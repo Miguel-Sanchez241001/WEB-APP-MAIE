@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="pe.com.bn.maie.persistencia.mapper.internal.OperacionMapper">
+
+    <resultMap id="operacionResultMap" type="pe.com.bn.maie.persistencia.dto.Operacion">
+     <id property="idOperacion" column="B02_ID_OPERACION" />
+        <result property="idEntidad" column="B01_ID_ENTIDAD" />
+        <result property="idConexion" column="B07_ID_CONEXION" />
+        <result property="descripcion" column="B02_DESCRIPCION" />
+        <result property="requiereBodyEnvio" column="B02_REQUIERE_BODY_ENVIO" />
+        <result property="codigoOperacion" column="B02_COD_OPERACION" /> <!-- NUEVO -->
+        <result property="usuarioCreacion" column="B02_USU_CRE" />
+        <result property="fechaCreacion" column="B02_FEC_CRE" />
+        <result property="usuarioModificacion" column="B02_USU_MOD" />
+        <result property="fechaModificacion" column="B02_FEC_MOD" />
+    </resultMap>
+
+    <!-- Para SP_02_SELECCIONAR_OPERACIONES -->
+    <select id="traerTodasLasOperaciones" statementType="CALLABLE" parameterType="java.util.Map" resultMap="operacionResultMap">
+        {call BN_MAIE.BNPKG_MAIE_OPERACION02.SP_02_SELECCIONAR_OPERACIONES(
+            #{o_cursor, mode=OUT, jdbcType=CURSOR, resultMap=operacionResultMap},
+            #{code_rpta, mode=OUT, jdbcType=VARCHAR},
+            #{desc_rpta, mode=OUT, jdbcType=VARCHAR}
+        )}
+    </select>
+
+    <!-- Para SP_01_BUSCAR_OPERACION -->
+    <select id="buscarOperacion" parameterType="java.util.Map" resultMap="operacionResultMap" statementType="CALLABLE">
+        {call BN_MAIE.BNPKG_MAIE_OPERACION02.SP_01_BUSCAR_OPERACION(
+            #{p_b02_id_operacion, mode=IN, jdbcType=NUMERIC, javaType=Long},
+            #{p_b01_id_entidad, mode=IN, jdbcType=VARCHAR, javaType=String},
+            #{p_b02_cod_operacion, mode=IN, jdbcType=VARCHAR, javaType=String}, <!-- NUEVO -->
+            #{o_cursor, mode=OUT, jdbcType=CURSOR, resultMap=operacionResultMap},
+            #{code_rpta, mode=OUT, jdbcType=VARCHAR},
+            #{desc_rpta, mode=OUT, jdbcType=VARCHAR}
+        )}
+    </select>
+
+    <!-- Para SP_03_ACTUALIZAR_OPERACION -->
+    <update id="actualizarOperacion" parameterType="java.util.Map" statementType="CALLABLE">
+        {call BN_MAIE.BNPKG_MAIE_OPERACION02.SP_03_ACTUALIZAR_OPERACION(
+            #{p_b02_id_operacion, mode=IN, jdbcType=NUMERIC, javaType=Long},
+            #{p_b01_id_entidad, mode=IN, jdbcType=VARCHAR, javaType=String},
+            #{p_b02_cod_operacion, mode=IN, jdbcType=VARCHAR, javaType=String}, <!-- NUEVO -->
+            #{p_b07_id_conexion, mode=IN, jdbcType=NUMERIC, javaType=Long},
+            #{p_b02_descripcion, mode=IN, jdbcType=VARCHAR, javaType=String},
+            #{p_b02_requiere_body_envio, mode=IN, jdbcType=NUMERIC, javaType=Integer},
+            #{p_b02_usu_mod, mode=IN, jdbcType=VARCHAR, javaType=String},
+            #{code_rpta, mode=OUT, jdbcType=VARCHAR},
+            #{desc_rpta, mode=OUT, jdbcType=VARCHAR}
+        )}
+    </update>
+
+    <!-- Para SP_04_INSERTAR_OPERACION -->
+    <insert id="insertarOperacion" parameterType="java.util.Map" statementType="CALLABLE">
+        {call BN_MAIE.BNPKG_MAIE_OPERACION02.SP_04_INSERTAR_OPERACION(
+            #{p_b01_id_entidad, mode=IN, jdbcType=VARCHAR, javaType=String},
+            #{p_b07_id_conexion, mode=IN, jdbcType=NUMERIC, javaType=Long},
+            #{p_b02_descripcion, mode=IN, jdbcType=VARCHAR, javaType=String},
+            #{p_b02_requiere_body_envio, mode=IN, jdbcType=NUMERIC, javaType=Integer},
+            #{p_b02_cod_operacion, mode=IN, jdbcType=VARCHAR, javaType=String}, <!-- NUEVO -->
+            #{p_b02_usu_cre, mode=IN, jdbcType=VARCHAR, javaType=String},
+            #{o_b02_id_operacion, mode=OUT, jdbcType=NUMERIC, javaType=Long},
+            #{code_rpta, mode=OUT, jdbcType=VARCHAR},
+            #{desc_rpta, mode=OUT, jdbcType=VARCHAR}
+        )}
+    </insert>
+
+</mapper>

@@ -1,0 +1,228 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:p="http://primefaces.org/ui"
+    template="/plantilla/plantilla.xhtml">
+
+    <ui:define name="content">
+
+        <h:form id="formEntidades">
+            <p:messages id="messages" showDetail="true" closable="true" />
+
+            <h3>Mantenimiento de Entidades</h3>
+            <p>Una entidad es una empresa o institucion que no pertenece al
+                Banco de la Nación y se necesita realizar alguna forma de traspaso
+                de información.</p>
+
+            <h:panelGrid styleClass="checkBoxGrid" columns="4" cellpadding="3">
+
+                <p:outputLabel for="chkCodigo" value="Código" />
+                <p:selectBooleanCheckbox id="chkCodigo"
+                    value="#{entidadController.entidadModel.buscarPorCodigo}">
+                    <p:ajax
+                        listener="#{entidadController.seleccionarBusquedaPorCodigo}"
+                        update="formEntidades" />
+                </p:selectBooleanCheckbox>
+                
+                <p:outputLabel for="chkDescripcion" value="Descripción" />
+                <p:selectBooleanCheckbox id="chkDescripcion"
+                    value="#{entidadController.entidadModel.buscarPorDescripcion}">
+                    <p:ajax
+                        listener="#{entidadController.seleccionarBusquedaPorDescripcion}"
+                        update="formEntidades" />
+                </p:selectBooleanCheckbox>
+
+            </h:panelGrid>
+
+
+            <!-- 🔍 Panel para búsqueda por CÓDIGO -->
+            <h:panelGroup styleClass="checkBoxGrid" id="panelCodigo"
+                rendered="#{entidadController.entidadModel.buscarPorCodigo}">
+                <h:panelGrid columns="3" cellpadding="5">
+                    <p:outputLabel for="buscarId" value="Código:" />
+                    <p:inputText id="buscarId"
+                        value="#{entidadController.entidadModel.filtroCodigo}" />
+                    <p:commandButton value="Buscar" icon="fa fa-search"
+                        actionListener="#{entidadController.buscarEntidadPorCodigo}"
+                        update="formEntidades:tablaEntidades, formEntidades:messages" />
+                </h:panelGrid>
+            </h:panelGroup>
+
+            <!-- 🔍 Panel para búsqueda por DESCRIPCIÓN -->
+            <h:panelGroup styleClass="checkBoxGrid" id="panelDescripcion"
+                rendered="#{entidadController.entidadModel.buscarPorDescripcion}">
+                <h:panelGrid columns="3" cellpadding="5">
+                    <p:outputLabel for="buscarDesc" value="Descripción:" />
+                    <p:selectOneMenu id="buscarDesc"
+                        value="#{entidadController.entidadModel.filtroCodigo}">
+                        <f:selectItem itemLabel="Seleccione una entidad" itemValue=""
+                            noSelectionOption="true" />
+                        <f:selectItems
+                            value="#{entidadController.entidadModel.listaEntidadesBusqueda}"
+                            var="ent" itemLabel="#{ent.descripcion}"
+                            itemValue="#{ent.idEntidad}" />
+                    </p:selectOneMenu>
+                    <p:commandButton value="Buscar" icon="fa fa-search"
+                        actionListener="#{entidadController.buscarEntidadPorCodigo}"
+                        update="formEntidades:tablaEntidades, formEntidades:messages" />
+                </h:panelGrid>
+            </h:panelGroup>
+
+
+            <!-- ⚙ Botones principales -->
+            <p:toolbar>
+                <p:toolbarGroup>
+                    <p:commandButton value="Nuevo" icon="fa fa-plus"
+                        onclick="PF('dlgEntidad').show();" process="@this"
+                        update="formDialogEntidad" />
+                        
+                    <p:commandButton value="Modificar" icon="fa fa-edit"
+                        actionListener="#{entidadController.cargarEntidadSeleccionada}"
+                        update="formEntidades,formDialogEntidad" process="@this"
+                        disabled="#{empty entidadController.entidadModel.entidadesSeleccionadas}" />
+                        
+                    <p:commandButton value="Habilitar" icon="fa fa-check"
+                        actionListener="#{entidadController.cambiarEstadoEntidadActivar}"
+                        update="formEntidades:tablaEntidades, formEntidades:messages" process="@this"
+                        disabled="#{empty entidadController.entidadModel.entidadesSeleccionadas}" />
+                        
+                    <p:commandButton value="Deshabilitar" icon="fa fa-ban"
+                        actionListener="#{entidadController.cambiarEstadoEntidaDesactivar}"
+                        update="formEntidades:tablaEntidades, formEntidades:messages" process="@this"
+                        disabled="#{empty entidadController.entidadModel.entidadesSeleccionadas}" />
+                </p:toolbarGroup>
+            </p:toolbar>
+
+            <!-- 📋 Tabla -->
+            <p:dataTable id="tablaEntidades" var="entidad"
+                styleClass="tabla-chica"
+                value="#{entidadController.entidadModel.listaEntidades}"
+                selection="#{entidadController.entidadModel.entidadesSeleccionadas}"
+                rowKey="#{entidad.idEntidad}" rowIndexVar="index" paginator="true" rows="5"
+                paginatorPosition="bottom"
+                
+                paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                rowsPerPageTemplate="5,10,15,20" scrollable="true"
+                scrollHeight="250" resizableColumns="true"
+                emptyMessage="No se encontraron entidades" update="@form">
+                <p:ajax event="rowSelectCheckbox" process="@this"
+                    update=":formEntidades" />
+                <p:ajax event="rowUnselectCheckbox" process="@this"
+                    update=":formEntidades" />
+                <p:ajax event="toggleSelect" process="@this" update=":formEntidades" />
+                <p:column selectionMode="multiple"
+                    style="width:16px;text-align:center" />
+
+                <!-- 🆔 ID Entidad -->
+                <p:column headerText="Código Entidad">
+                    <h:outputText value="#{entidad.idEntidad}" />
+                </p:column>
+
+                <!-- 📄 Descripción -->
+                <p:column headerText="Descripción">
+                    <h:outputText value="#{entidad.descripcion}" />
+                </p:column>
+
+                <!-- 🌐 Tipo Comunicación -->
+                <p:column headerText="Tipo Comunicación">
+                    <h:outputText value="#{entidad.tipoComunicacion == 1 ? 'REST' : (entidad.tipoComunicacion == 2 ? 'SOAP' : (entidad.tipoComunicacion == 3 ? 'MQ' : 'Desconocido'))}" />
+                </p:column>
+
+                <!-- 📊 Tipo Trama BN -->
+                <p:column headerText="Tipo Trama BN">
+                    <h:outputText value="#{entidad.tipoTramaBn == 1 ? 'Estándar' : (entidad.tipoTramaBn == 2 ? 'Custom' : 'Desconocido')}" />
+                </p:column>
+
+                <!-- 📤 Tipo Trama EX -->
+                <p:column headerText="Tipo Trama EX">
+                    <h:outputText value="#{entidad.tipoTramaEx == 1 ? 'JSON' : (entidad.tipoTramaEx == 2 ? 'XML' : 'Desconocido')}" />
+                </p:column>
+
+                <!-- 🗺️ Ind Mapeo -->
+                <p:column headerText="Requiere Mapeo">
+                    <h:outputText value="#{entidad.indMapeo == 1 ? 'Sí' : 'No'}" />
+                </p:column>
+
+                <!-- ✅ Estado -->
+                <p:column headerText="Estado">
+                    <h:outputText value="#{entidad.estado == 1 ? 'Activo' : 'Inactivo'}" />
+                </p:column>
+
+            </p:dataTable>
+
+        </h:form>
+
+        <!-- 💬 Modal para crear/modificar entidad -->
+        <p:dialog header="Entidad" widgetVar="dlgEntidad" modal="true"
+            resizable="false" closable="true" width="500">
+            <h:form id="formDialogEntidad">
+                <p:panelGrid columns="2" columnClasses="label,value">
+
+                    <p:outputLabel for="idEntidad" value="Código Entidad:" />
+                    <p:inputText id="idEntidad"
+                        value="#{entidadController.entidadModel.entidadEdicion.idEntidad}"
+                        readonly="#{entidadController.entidadModel.modificacionEntidad}"
+                        required="true" />
+
+                    <p:outputLabel for="descripcion" value="Descripción:" />
+                    <p:inputText id="descripcion"
+                        value="#{entidadController.entidadModel.entidadEdicion.descripcion}"
+                        required="true" />
+
+                    <p:outputLabel for="tipoComunicacion" value="Tipo Comunicación:" />
+                    <p:selectOneMenu id="tipoComunicacion"
+                        value="#{entidadController.entidadModel.entidadEdicion.tipoComunicacion}"
+                        required="true">
+                        <f:selectItem itemLabel="Seleccione" itemValue="" noSelectionOption="true" />
+                        <f:selectItem itemLabel="REST" itemValue="1" />
+                        <f:selectItem itemLabel="SOAP" itemValue="2" />
+                        <f:selectItem itemLabel="MQ" itemValue="3" />
+                    </p:selectOneMenu>
+
+                    <p:outputLabel for="tipoTramaBn" value="Tipo Trama BN:" />
+                    <p:selectOneMenu id="tipoTramaBn"
+                        value="#{entidadController.entidadModel.entidadEdicion.tipoTramaBn}"
+                        required="true">
+                        <f:selectItem itemLabel="Seleccione" itemValue="" noSelectionOption="true" />
+                        <f:selectItem itemLabel="Estándar" itemValue="1" />
+                        <f:selectItem itemLabel="Custom" itemValue="2" />
+                    </p:selectOneMenu>
+
+                    <p:outputLabel for="tipoTramaEx" value="Tipo Trama EX:" />
+                    <p:selectOneMenu id="tipoTramaEx"
+                        value="#{entidadController.entidadModel.entidadEdicion.tipoTramaEx}"
+                        required="true">
+                        <f:selectItem itemLabel="Seleccione" itemValue="" noSelectionOption="true" />
+                        <f:selectItem itemLabel="JSON" itemValue="1" />
+                        <f:selectItem itemLabel="XML" itemValue="2" />
+                    </p:selectOneMenu>
+
+                    <p:outputLabel for="indMapeo" value="Requiere Mapeo:" />
+                    <p:selectOneMenu id="indMapeo"
+                        value="#{entidadController.entidadModel.entidadEdicion.indMapeo}"
+                        required="true" converter="javax.faces.Integer">
+                        <f:selectItem itemLabel="Seleccione" itemValue="" noSelectionOption="true" />
+                        <f:selectItem itemLabel="Sí" itemValue="1" />
+                        <f:selectItem itemLabel="No" itemValue="0" />
+                    </p:selectOneMenu>
+
+                    <p:outputLabel for="estado" value="Estado:" />
+                    <p:selectOneMenu id="estado"
+                        value="#{entidadController.entidadModel.entidadEdicion.estado}"
+                        required="true">
+                        <f:selectItem itemLabel="Sí" itemValue="1" />
+                        <f:selectItem itemLabel="No" itemValue="0" />
+                    </p:selectOneMenu>
+                </p:panelGrid>
+
+                <p:commandButton value="Guardar" icon="fa fa-save"
+                    actionListener="#{entidadController.registrarEntidad()}"
+                    update=":formEntidades:tablaEntidades, :formEntidades:messages"
+                    oncomplete="PF('dlgEntidad').hide();" />
+            </h:form>
+        </p:dialog>
+
+    </ui:define>
+
+</ui:composition>

@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app id="WebApp_ID" version="3.0" 
+    xmlns="http://java.sun.com/xml/ns/javaee" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
+
+    <!-- Configuración general de la aplicación -->
+    <display-name>MAIE</display-name>
+
+    <!-- ****************************** -->
+    <!-- Configuraciones de Spring       -->
+    <!-- ****************************** -->
+    <context-param>
+        <param-name>contextClass</param-name>
+        <param-value>org.springframework.web.context.support.AnnotationConfigWebApplicationContext</param-value>
+    </context-param>
+    <context-param>
+        <param-name>contextConfigLocation</param-name>
+        <param-value>pe.com.bn.maie.tranversal.config.init.AppInit</param-value>
+    </context-param>
+    
+    <listener>
+        <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+    </listener>
+
+    <!-- ****************************** -->
+    <!-- Configuraciones de JSF         -->
+    <!-- ****************************** -->
+    <context-param>
+        <param-name>javax.faces.PROJECT_STAGE</param-name>
+        <param-value>Development</param-value>
+    </context-param>
+    <context-param>
+        <param-name>javax.faces.DEFAULT_SUFFIX</param-name>
+        <param-value>.xhtml</param-value>
+    </context-param>
+    <context-param>
+        <param-name>javax.faces.STATE_SAVING_METHOD</param-name>
+        <param-value>client</param-value>
+    </context-param>
+    
+    <!-- Configuración del servlet JSF -->
+    <servlet>
+        <servlet-name>FacesServlet</servlet-name>
+        <servlet-class>javax.faces.webapp.FacesServlet</servlet-class>
+        <load-on-startup>1</load-on-startup>
+        <!-- Configuración para subida de archivos -->
+        <multipart-config>
+            <max-file-size>10485760</max-file-size> <!-- 10MB -->
+            <max-request-size>20971520</max-request-size> <!-- 20MB -->
+            <file-size-threshold>524288</file-size-threshold> <!-- 512KB -->
+        </multipart-config>
+    </servlet>
+    
+    <servlet-mapping>
+        <servlet-name>FacesServlet</servlet-name>
+        <url-pattern>*.xhtml</url-pattern>
+    </servlet-mapping>
+<mime-mapping>
+    <extension>woff2</extension>
+    <mime-type>font/woff2</mime-type>
+</mime-mapping>
+<mime-mapping>
+    <extension>woff</extension>
+    <mime-type>font/woff</mime-type>
+</mime-mapping>
+
+    <!-- ****************************** -->
+    <!-- Configuraciones de PrimeFaces  -->
+    <!-- ****************************** -->
+<context-param>
+    <param-name>primefaces.THEME</param-name>
+    <param-value>nova-light</param-value>
+</context-param>
+ 
+
+    <!-- ****************************** -->
+    <!-- Configuraciones de seguridad y sesión -->
+    <!-- ****************************** -->
+    <session-config>
+        <session-timeout>30</session-timeout> <!-- 30 minutos -->
+    </session-config>
+
+    <!-- ****************************** -->
+    <!-- Configuraciones de encoding    -->
+    <!-- ****************************** -->
+    <filter>
+        <filter-name>CharacterEncodingFilter</filter-name>
+        <filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
+        <init-param>
+            <param-name>encoding</param-name>
+            <param-value>UTF-8</param-value>
+        </init-param>
+        <init-param>
+            <param-name>forceEncoding</param-name>
+            <param-value>true</param-value>
+        </init-param>
+    </filter>
+    <filter-mapping>
+        <filter-name>CharacterEncodingFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
+    <!-- ****************************** -->
+    <!-- Configuraciones de páginas     -->
+    <!-- ****************************** -->
+    <welcome-file-list>
+        <welcome-file>index.xhtml</welcome-file>
+    </welcome-file-list>
+    
+    <service-ref>
+    	<service-ref-name>service/AutenticaRegService</service-ref-name>
+    	<service-interface>pe.com.bn.maie.infraestructura.services.external.domain.wsautentica.AutenticaRegService</service-interface>
+    	<wsdl-file>WEB-INF/wsdl/AutenticaReg.wsdl</wsdl-file>
+    	<service-qname xmlns:pfx="http://service.seguridad">pfx:AutenticaRegService</service-qname>
+    	<port-component-ref>
+    		<service-endpoint-interface>pe.com.bn.maie.infraestructura.services.external.domain.wsautentica.AutenticaReg</service-endpoint-interface>
+    		<enable-mtom>false</enable-mtom>
+    	</port-component-ref>
+    </service-ref>
+
+
+	<filter>
+		<filter-name>springSecurityFilterChain</filter-name>
+		<filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+	</filter>
+
+	<filter-mapping>
+		<filter-name>springSecurityFilterChain</filter-name>
+		<url-pattern>/*</url-pattern>
+		<dispatcher>FORWARD</dispatcher>
+		<dispatcher>REQUEST</dispatcher>
+	</filter-mapping>
+	<resource-ref>
+		<description>
+		Autogenerado - Conexión de origen de datos SDO con orades</description>
+		<res-ref-name>orades</res-ref-name>
+		<res-type>javax.sql.DataSource</res-type>
+		<res-auth>Container</res-auth>
+		<res-sharing-scope>Shareable</res-sharing-scope>
+	</resource-ref>
+    <!-- Configuración de páginas de error (opcional) -->
+    <!--
+    <error-page>
+        <error-code>404</error-code>
+        <location>/error/404.xhtml</location>
+    </error-page>
+    -->
+</web-app>

@@ -1,0 +1,202 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:p="http://primefaces.org/ui"
+    template="/plantilla/plantilla.xhtml">
+
+    <ui:define name="content">
+
+        <h:form id="formOperaciones">
+            <p:messages id="messages" showDetail="true" closable="true" />
+
+            <h3>Mantenimiento de Operaciones</h3>
+            <p>Gestión de las operaciones asociadas a entidades y conexiones.</p>
+
+            <h:panelGrid styleClass="checkBoxGrid" columns="6" cellpadding="3">
+                <p:outputLabel for="chkIdOperacion" value="Buscar por ID Operación" />
+                <p:selectBooleanCheckbox id="chkIdOperacion"
+                    value="#{operacionController.operacionModel.buscarPorIdOperacion}">
+                    <p:ajax listener="#{operacionController.seleccionarBusquedaPorIdOperacion}"
+                        update="formOperaciones:panelBusqueda" />
+                </p:selectBooleanCheckbox>
+                
+                <p:outputLabel for="chkIdEntidad" value="Buscar por ID Entidad" />
+                <p:selectBooleanCheckbox id="chkIdEntidad"
+                    value="#{operacionController.operacionModel.buscarPorIdEntidad}">
+                    <p:ajax listener="#{operacionController.seleccionarBusquedaPorIdEntidad}"
+                        update="formOperaciones:panelBusqueda" />
+                </p:selectBooleanCheckbox>
+
+                <p:outputLabel for="chkCodigoOperacion" value="Buscar por Código Operación" />
+                <p:selectBooleanCheckbox id="chkCodigoOperacion"
+                    value="#{operacionController.operacionModel.buscarPorCodigoOperacion}">
+                    <p:ajax listener="#{operacionController.seleccionarBusquedaPorCodigoOperacion}"
+                        update="formOperaciones:panelBusqueda" />
+                </p:selectBooleanCheckbox>
+            </h:panelGrid>
+
+            <!-- 🔍 Panel para búsqueda por ID de Operación, ID de Entidad y/o Código de Operación -->
+            <h:panelGroup id="panelBusqueda">
+                <h:panelGrid columns="3" cellpadding="5"
+                    rendered="#{operacionController.operacionModel.buscarPorIdOperacion or operacionController.operacionModel.buscarPorIdEntidad or operacionController.operacionModel.buscarPorCodigoOperacion}">
+                    
+                    <p:outputLabel for="buscarIdOperacion" value="ID Operación:"
+                        rendered="#{operacionController.operacionModel.buscarPorIdOperacion}" />
+                    <p:inputText id="buscarIdOperacion"
+                        value="#{operacionController.operacionModel.filtroIdOperacion}"
+                        converter="javax.faces.Long"
+                        rendered="#{operacionController.operacionModel.buscarPorIdOperacion}" />
+                    <h:panelGroup rendered="#{operacionController.operacionModel.buscarPorIdOperacion}" /> <!-- Espaciador -->
+
+                    <p:outputLabel for="buscarIdEntidad" value="ID Entidad:"
+                        rendered="#{operacionController.operacionModel.buscarPorIdEntidad}" />
+                    <p:inputText id="buscarIdEntidad"
+                        value="#{operacionController.operacionModel.filtroIdEntidad}"
+                        rendered="#{operacionController.operacionModel.buscarPorIdEntidad}" />
+                    <h:panelGroup rendered="#{operacionController.operacionModel.buscarPorIdEntidad}" /> <!-- Espaciador -->
+
+                    <p:outputLabel for="buscarCodigoOperacion" value="Código Operación:"
+                        rendered="#{operacionController.operacionModel.buscarPorCodigoOperacion}" />
+                    <p:inputText id="buscarCodigoOperacion"
+                        value="#{operacionController.operacionModel.filtroCodigoOperacion}"
+                        rendered="#{operacionController.operacionModel.buscarPorCodigoOperacion}" />
+                    <h:panelGroup rendered="#{operacionController.operacionModel.buscarPorCodigoOperacion}" /> <!-- Espaciador -->
+
+                    <p:commandButton value="Buscar" icon="fa fa-search"
+                        actionListener="#{operacionController.buscarOperacionPorId}"
+                        update="formOperaciones:tablaOperaciones, formOperaciones:messages"
+                        rendered="#{operacionController.operacionModel.buscarPorIdOperacion or operacionController.operacionModel.buscarPorIdEntidad or operacionController.operacionModel.buscarPorCodigoOperacion}" />
+                </h:panelGrid>
+            </h:panelGroup>
+
+            <!-- ⚙ Botones principales -->
+            <p:toolbar>
+                <p:toolbarGroup>
+                    <p:commandButton value="Nuevo" icon="fa fa-plus"
+                        onclick="PF('dlgOperacion').show();" process="@this"
+                        update="formDialogOperacion" />
+                        
+                    <p:commandButton value="Modificar" icon="fa fa-edit"
+                        actionListener="#{operacionController.cargarOperacionSeleccionada}"
+                        update="formOperaciones,formDialogOperacion" process="@this"
+                        disabled="#{empty operacionController.operacionModel.operacionesSeleccionadas}" />
+                </p:toolbarGroup>
+            </p:toolbar>
+
+            <!-- 📋 Tabla -->
+            <p:dataTable id="tablaOperaciones" var="operacion"
+                styleClass="tabla-chica"
+                value="#{operacionController.operacionModel.listaOperaciones}"
+                selection="#{operacionController.operacionModel.operacionesSeleccionadas}"
+                rowKey="#{operacion.idOperacion}" rowIndexVar="index" paginator="true" rows="5"
+                paginatorPosition="bottom"
+                paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                rowsPerPageTemplate="5,10,15,20" scrollable="true"
+                scrollHeight="250" resizableColumns="true"
+                emptyMessage="No se encontraron operaciones" update="@form">
+                <p:ajax event="rowSelectCheckbox" process="@this"
+                    update=":formOperaciones" />
+                <p:ajax event="rowUnselectCheckbox" process="@this"
+                    update=":formOperaciones" />
+                <p:ajax event="toggleSelect" process="@this" update=":formOperaciones" />
+                <p:column selectionMode="multiple"
+                    style="width:16px;text-align:center" />
+
+                <!-- 🆔 ID Operación -->
+                <p:column headerText="ID Operación">
+                    <h:outputText value="#{operacion.idOperacion}" />
+                </p:column>
+
+                <!-- 🆔 ID Entidad -->
+                <p:column headerText="ID Entidad">
+                    <h:outputText value="#{operacion.idEntidad}" />
+                </p:column>
+
+                <!-- 🆔 ID Conexión -->
+                <p:column headerText="ID Conexión">
+                    <h:outputText value="#{operacion.idConexion}" />
+                </p:column>
+
+                <!-- 📄 Descripción -->
+                <p:column headerText="Descripción">
+                    <h:outputText value="#{operacion.descripcion}" />
+                </p:column>
+
+                <!-- ➡️ Requiere Body Envío -->
+                <p:column headerText="Requiere Body Envío">
+                    <h:outputText value="#{operacion.requiereBodyEnvio == 1 ? 'Sí' : 'No'}" />
+                </p:column>
+
+                <!-- 🔢 Código Operación -->
+                <p:column headerText="Código Operación">
+                    <h:outputText value="#{operacion.codigoOperacion}" />
+                </p:column>
+
+            </p:dataTable>
+
+        </h:form>
+
+        <!-- 💬 Modal para crear/modificar operación -->
+        <p:dialog header="Operación" widgetVar="dlgOperacion" modal="true"
+            resizable="false" closable="true" width="550">
+            <h:form id="formDialogOperacion">
+                <p:panelGrid columns="2" columnClasses="label,value">
+
+                    <p:outputLabel for="idOperacion" value="ID Operación:" />
+                    <p:inputText id="idOperacion"
+                        value="#{operacionController.operacionModel.operacionEdicion.idOperacion}"
+                        readonly="#{operacionController.operacionModel.modificacionOperacion}"
+                        required="true" converter="javax.faces.Long" />
+
+                    <p:outputLabel for="idEntidad" value="ID Entidad:" />
+                    <p:selectOneMenu id="idEntidad"
+                        value="#{operacionController.operacionModel.operacionEdicion.idEntidad}"
+                        required="true">
+                        <f:selectItem itemLabel="Seleccione una Entidad" itemValue="" noSelectionOption="true" />
+                        <f:selectItems value="#{operacionController.operacionModel.listaEntidades}"
+                            var="ent" itemLabel="#{ent.descripcion} (#{ent.idEntidad})"
+                            itemValue="#{ent.idEntidad}" />
+                    </p:selectOneMenu>
+
+                    <p:outputLabel for="idConexion" value="ID Conexión:" />
+                    <p:selectOneMenu id="idConexion"
+                        value="#{operacionController.operacionModel.operacionEdicion.idConexion}"
+                        required="true" converter="javax.faces.Long">
+                        <f:selectItem itemLabel="Seleccione una Conexión" itemValue="" noSelectionOption="true" />
+                        <f:selectItems value="#{operacionController.operacionModel.listaConexiones}"
+                            var="con" itemLabel="#{con.host}:#{con.puerto} (#{con.idConexion})"
+                            itemValue="#{con.idConexion}" />
+                    </p:selectOneMenu>
+
+                    <p:outputLabel for="descripcion" value="Descripción:" />
+                    <p:inputText id="descripcion"
+                        value="#{operacionController.operacionModel.operacionEdicion.descripcion}"
+                        required="true" />
+
+                    <p:outputLabel for="requiereBodyEnvio" value="Requiere Body Envío:" />
+                    <p:selectOneMenu id="requiereBodyEnvio"
+                        value="#{operacionController.operacionModel.operacionEdicion.requiereBodyEnvio}"
+                        required="true" converter="javax.faces.Integer">
+                        <f:selectItem itemLabel="Seleccione" itemValue="" noSelectionOption="true" />
+                        <f:selectItem itemLabel="Sí" itemValue="1" />
+                        <f:selectItem itemLabel="No" itemValue="0" />
+                    </p:selectOneMenu>
+
+                    <p:outputLabel for="codigoOperacion" value="Código Operación:" />
+                    <p:inputText id="codigoOperacion"
+                        value="#{operacionController.operacionModel.operacionEdicion.codigoOperacion}"
+                        required="true" maxlength="4" />
+
+                </p:panelGrid>
+
+                <p:commandButton value="Guardar" icon="fa fa-save"
+                    actionListener="#{operacionController.registrarOperacion()}"
+                    update=":formOperaciones:tablaOperaciones, :formOperaciones:messages"
+                    oncomplete="if (!args.validationFailed) PF('dlgOperacion').hide();" />
+            </h:form>
+        </p:dialog>
+
+    </ui:define>
+
+</ui:composition>

@@ -1,0 +1,211 @@
+<ui:composition 
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:p="http://primefaces.org/ui"
+    template="/plantilla/plantilla.xhtml">
+
+    <ui:define name="content">
+        <h:form id="formParametros">
+            <p:growl id="mensajes" showDetail="true" />
+            
+            <p:panel header="Gestión de Parámetros" style="margin-bottom:20px">
+                <p:toolbar>
+                    <p:toolbarGroup align="left">
+                        <p:commandButton value="Nuevo Parámetro" icon="ui-icon-document" 
+                                       actionListener="#{parametroController.limpiarFormulario()}"
+                                       update=":formDialog" oncomplete="PF('dlgParametro').show();"
+                                       styleClass="ui-button-success" style="margin-right: 10px;"/>
+                                       
+                        <p:commandButton value="Nuevo Grupo" icon="ui-icon-folder" 
+                                       actionListener="#{parametroController.prepararNuevoGrupo()}"
+                                       update=":formGrupo" oncomplete="PF('dlgNuevoGrupo').show();"
+                                       styleClass="ui-button-info" style="margin-right: 10px;"/>
+                                       
+                        <p:commandButton value="Editar" icon="ui-icon-pencil" 
+                                       actionListener="#{parametroController.cargarParametroSeleccionado()}"
+                                       update=":formDialog :formParametros:mensajes"
+                                       styleClass="ui-button-warning" style="margin-right: 10px;"/>
+                                       
+                        <p:commandButton value="Activar" icon="ui-icon-check" 
+                                       actionListener="#{parametroController.activarParametros()}"
+                                       update="tablaParametros mensajes"
+                                       styleClass="ui-button-primary" style="margin-right: 10px;"/>
+                                       
+                        <p:commandButton value="Desactivar" icon="ui-icon-close" 
+                                       actionListener="#{parametroController.desactivarParametros()}"
+                                       update="tablaParametros mensajes"
+                                       styleClass="ui-button-danger"/>
+                    </p:toolbarGroup>
+                </p:toolbar>
+                
+                <p:spacer height="10"/>
+                
+                <p:panel header="Búsqueda de Parámetros" toggleable="true" collapsed="false">
+                    <h:panelGrid columns="3" cellpadding="5">
+                        <p:panelGrid columns="2">
+                            <p:outputLabel for="filtroGrupo" value="Grupo:"/>
+                            <p:inputText id="filtroGrupo" value="#{parametroController.parametroModel.filtroCodigoGrupo}"/>
+                            
+                            <p:outputLabel for="filtroParametro" value="Parámetro:"/>
+                            <p:inputText id="filtroParametro" value="#{parametroController.parametroModel.filtroCodigoParametro}"/>
+                        </p:panelGrid>
+                        
+                        <p:commandButton value="Buscar" icon="ui-icon-search"
+                                       actionListener="#{parametroController.buscarParametro()}"
+                                       update="tablaParametros mensajes"/>
+                                       
+                        <p:commandButton value="Limpiar" icon="ui-icon-refresh"
+                                       actionListener="#{parametroController.limpiarFiltros()}"
+                                       update="tablaParametros filtroGrupo filtroParametro mensajes"/>
+                    </h:panelGrid>
+                </p:panel>
+                
+                <p:spacer height="20"/>
+                
+                <p:dataTable id="tablaParametros" 
+                             value="#{parametroController.parametroModel.listaParametros}" 
+                             var="parametro"
+                             selection="#{parametroController.parametroModel.parametrosSeleccionados}"
+                             rowKey="#{parametro.idParametro}"
+                             paginator="true"
+                             rows="10"
+                             rowsPerPageTemplate="5,10,15"
+                             paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                             emptyMessage="No se encontraron parámetros">
+                    
+                    <f:facet name="header">
+                        <h:outputText value="Lista de Parámetros"/>
+                    </f:facet>
+                    
+                    <p:column selectionMode="multiple" style="width:50px;text-align:center"/>
+                    
+              S
+                    <p:column headerText="Grupo"   >
+                        <h:outputText value="#{parametro.codigoGrupo}"/>
+                    </p:column>
+                    
+                    <p:column headerText="Código"  >
+                        <h:outputText value="#{parametro.codigoParametro}"/>
+                    </p:column>
+                    
+                    <p:column headerText="Descripción"  >
+                        <h:outputText value="#{parametro.descripcion}"/>
+                    </p:column>
+                    
+                    <p:column headerText="Valor 1" >
+                        <h:outputText value="#{parametro.valor1}"/>
+                    </p:column>
+                    
+                    <p:column headerText="Valor 2"  >
+                        <h:outputText value="#{parametro.valor2}"/>
+                    </p:column>
+                    
+                    <p:column headerText="Operación"  style="width:80px;">
+                        <h:outputText value="#{parametro.codigoOperacion}"/>
+                    </p:column>
+                    
+            
+                    
+                    <p:column headerText="Estado" style="width:70px;text-align:center">
+                    <h:outputText value="#{parametro.indicadorActivo== 1 ? 'Sí' : 'No'}" />
+                </p:column>
+                </p:dataTable>
+            </p:panel>
+        </h:form>
+        
+        <!-- Diálogo para crear/editar parámetros -->
+        <p:dialog header="Parámetro" widgetVar="dlgParametro" modal="true" 
+                 showEffect="fade" hideEffect="fade" resizable="false" width="500">
+            <h:form id="formDialog">
+                <p:panelGrid columns="2" styleClass="ui-panelgrid-blank ui-fluid">
+                    <p:outputLabel for="codigoGrupo" value="Grupo:"/>
+                    <p:selectOneMenu id="codigoGrupo" value="#{parametroController.parametroModel.parametroEdicion.codigoGrupo}" 
+                                   required="true" requiredMessage="El grupo es obligatorio">
+                        <f:selectItem itemLabel="Seleccione un grupo" itemValue=""/>
+                        <f:selectItems value="#{parametroController.parametroModel.listaGrupos}" 
+                                     var="grupo" itemLabel="#{grupo.descripcion}" itemValue="#{grupo.codigoGrupo}"/>
+                    </p:selectOneMenu>
+                    
+                    <p:outputLabel for="codigoParametro" value="Código Parámetro:"/>
+                    <p:inputText id="codigoParametro" value="#{parametroController.parametroModel.parametroEdicion.codigoParametro}" 
+                               required="true" requiredMessage="El código del parámetro es obligatorio"
+                               disabled="#{parametroController.parametroModel.modificacionParametro}"/>
+                    
+                    <p:outputLabel for="descripcion" value="Descripción:"/>
+                    <p:inputText id="descripcion" value="#{parametroController.parametroModel.parametroEdicion.descripcion}" 
+                               required="true" requiredMessage="La descripción es obligatoria"/>
+                    
+                    <p:outputLabel for="valor1" value="Valor 1:"/>
+                    <p:inputText id="valor1" value="#{parametroController.parametroModel.parametroEdicion.valor1}"/>
+                    
+                    <p:outputLabel for="valor2" value="Valor 2:"/>
+                    <p:inputText id="valor2" value="#{parametroController.parametroModel.parametroEdicion.valor2}"/>
+                    
+                    <p:outputLabel for="operacionRelacionada" value="¿Relacionado a Operación?"/>
+                    <p:selectBooleanCheckbox id="operacionRelacionada" value="#{parametroController.parametroModel.parametroConOperacion}"
+                                          disabled="#{parametroController.parametroModel.modificacionParametro}">
+                        <p:ajax update="codigoOperacion" process="@this"/>
+                    </p:selectBooleanCheckbox>
+                    
+                    <p:outputLabel for="codigoOperacion" value="Código Operación:"/>
+                    <p:inputNumber id="codigoOperacion" value="#{parametroController.parametroModel.parametroEdicion.codigoOperacion}"
+                                disabled="#{!parametroController.parametroModel.parametroConOperacion}"/>
+                    
+                    <p:outputLabel for="estado" value="Estado:" rendered="#{parametroController.parametroModel.modificacionParametro}"/>
+                    <p:selectOneMenu id="estado" value="#{parametroController.parametroModel.parametroEdicion.indicadorActivo}" 
+                                   required="true" requiredMessage="El estado es obligatorio"
+                                   rendered="#{parametroController.parametroModel.modificacionParametro}">
+                        <f:selectItem itemLabel="Activo" itemValue="1"/>
+                        <f:selectItem itemLabel="Inactivo" itemValue="0"/>
+                    </p:selectOneMenu>
+                </p:panelGrid>
+                
+                <p:separator/>
+                
+                <div class="ui-dialog-buttonpane ui-widget-content ui-helper-clearfix">
+                    <p:commandButton value="Guardar" icon="ui-icon-disk" 
+                                   actionListener="#{parametroController.registrarParametro()}" 
+                                   update=":formParametros:tablaParametros :formParametros:mensajes"
+                                   oncomplete="if(!args.validationFailed) PF('dlgParametro').hide();"
+                                   styleClass="ui-button-success"/>
+                                   
+                    <p:commandButton value="Cancelar" icon="ui-icon-cancel" 
+                                   onclick="PF('dlgParametro').hide();"
+                                   styleClass="ui-button-secondary"/>
+                </div>
+            </h:form>
+        </p:dialog>
+        
+        <!-- Diálogo para crear nuevo grupo -->
+        <p:dialog header="Nuevo Grupo de Parámetros" widgetVar="dlgNuevoGrupo" modal="true" 
+                 showEffect="fade" hideEffect="fade" resizable="false" width="400">
+            <h:form id="formGrupo">
+                <p:panelGrid columns="2" styleClass="ui-panelgrid-blank ui-fluid">
+                    <p:outputLabel for="nuevoCodigoGrupo" value="Código de Grupo:"/>
+                    <p:inputText id="nuevoCodigoGrupo" value="#{parametroController.parametroModel.nuevoCodigoGrupo}" 
+                               required="true" requiredMessage="El código de grupo es obligatorio"/>
+                    
+                    <p:outputLabel for="nuevaDescripcionGrupo" value="Descripción:"/>
+                    <p:inputText id="nuevaDescripcionGrupo" value="#{parametroController.parametroModel.nuevaDescripcionGrupo}" 
+                               required="true" requiredMessage="La descripción del grupo es obligatoria"/>
+                </p:panelGrid>
+                
+                <p:separator/>
+                
+                <div class="ui-dialog-buttonpane ui-widget-content ui-helper-clearfix">
+                    <p:commandButton value="Crear" icon="ui-icon-disk" 
+                                   actionListener="#{parametroController.crearNuevoGrupo()}" 
+                                   update=":formParametros:mensajes"
+                                   oncomplete="if(!args.validationFailed) PF('dlgNuevoGrupo').hide();"
+                                   styleClass="ui-button-success"/>
+                                   
+                    <p:commandButton value="Cancelar" icon="ui-icon-cancel" 
+                                   onclick="PF('dlgNuevoGrupo').hide();"
+                                   styleClass="ui-button-secondary"/>
+                </div>
+            </h:form>
+        </p:dialog>
+    </ui:define>
+</ui:composition>

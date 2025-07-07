@@ -1,0 +1,271 @@
+@charset "ISO-8859-1";
+
+:root {
+	/* ===== Colores principales ===== */ -
+	-color-primary: #7b1d1d; /* Nuevo color principal */ -
+	-color-secondary: #922323; /* Color secundario más oscuro */ -
+	-color-accent: #7b1d1d; /* Acento coherente */ -
+	-color-light: #ecf0f1; /* Fondo claro */ -
+	-color-dark: #2c3e50; /* Texto oscuro */
+	/* ===== Dimensiones ===== */ -
+	-header-height: 10vh; /* Altura del header */ -
+	-sidebar-width: 10vw; /* Ancho del menú lateral */
+	/* ===== Espaciados ===== */ -
+	-spacing-sm: 0.5rem; /* 8px */ -
+	-spacing-md: 1rem; /* 16px */ -
+	-spacing-lg: 1.5rem; /* 24px */
+	/* ===== Sombras ===== */ -
+	-shadow-light: 0 2px 5px rgba(0, 0, 0, 0.1); -
+	-shadow-medium: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+/* ===== Reset básico ===== */
+html, body {
+	margin: 0;
+	padding: 0;
+	height: 100%;
+	font-family: 'Arial', sans-serif;
+	background: url(../resources/img/bg-body_sv.jpg) repeat;
+}
+
+/* ===== Contenedor principal ===== */
+.container {
+	display: flex;
+	flex-direction: column;
+	min-height: 111vh;
+}
+
+/* ===== Header ===== */
+.header {
+	height: var(- -header-height);
+	display: flex;
+	background-color: #7b1d1d;
+	justify-content: space-between;
+	align-items: center;
+	padding: var(- -spacing-lg);
+	box-shadow: var(- -shadow-medium);
+}
+
+.header div button {
+	background-color: #fff;
+	color: #7b1d1d;
+	font-weight: bold;
+	border: 1px solid #ddd;
+	border-radius: 25px;
+}
+
+
+.ui-menu-list li.ui-menuitem{
+		font-size: 11px !important;
+	
+}
+.header div button:hover {
+	background-color: #7b1d1d;
+	color: #fff;
+	font-weight: bold;
+	border: 1px solid #fff;
+}
+
+/* Información de usuario */
+.user-info {
+	display: flex;
+	gap: var(--spacing-md);
+	align-items: center;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+/* ===== Contenido principal ===== */
+.main-content {
+	display: flex;
+	/*   margin: 20px 70px;*/
+	border-radius: 25px;
+	box-shadow: var(- -shadow-light);
+	flex: 1;
+	overflow: hidden;
+}
+
+/* ===== Menú lateral ===== */
+.menu-lateral {
+	box-shadow: var(- -shadow-medium);
+	overflow-y: auto;
+}
+
+/* ===== Área de contenido ===== */
+.contenido-principal {
+	flex: 1;
+	padding: 0px 20px;
+	/*padding: var(--spacing-lg);
+     box-shadow: var(--shadow-light);
+     border-radius: 4px; */
+	overflow-y: auto;
+	background: white;
+	font-size: 13px;
+}
+
+.ui-toolbar {
+	width: 60%;
+}
+
+.ui-toolbar button{
+	font-size: 11px !important;
+
+}
+
+.ui-datatable.ui-datatable-scrollable {
+	font-size: 11px !important;
+	width: 60%;
+}
+
+.ui-datatable .ui-datatable-data>tr>td {
+	padding: 4px 8px !important;
+}
+
+.ui-datatable thead th, .ui-datatable .ui-datatable-header {
+	background-color: #f3f3f3 !important;
+	color: #000 !important;
+	font-weight: bold !important;
+	font-size: 12px !important;
+}
+
+.ui-datatable .ui-datatable-data>tr.ui-state-highlight {
+	background-color: #b0d8ff !important;
+	color: #000 !important;
+}
+
+.ui-datatable .ui-datatable-data>tr:hover {
+	background-color: #eaf6ff !important;
+}
+
+/* ===== Estilos de texto ===== */
+.sp-rojo {
+	font-weight: 600;
+}
+
+.sp-gris {
+	font-weight: 400;
+}
+
+/* ===== component Header  ===== */
+.header-top {
+	width: 100%;
+	/*border: 2px dashed red; */
+	border-top: 5px solid #7b1d1d;
+	height: 9vh;
+	color: #000;
+	padding: var(- -spacing-lg);
+	background-color: #fff !important;
+	display: flex;
+	flex-direction: row; /* Cambia a 'column' para ponerlos en columna */
+	justify-content: space-between; /* Alineación horizontal */
+	align-items: center; /* Alineación vertical */
+	border-bottom: 1px solid #ddd;
+}
+
+.header-top span {
+	font-size: 1.5rem; /* Ajusta el tamaño de la letra */
+	font-weight: bold; /* Resalta en negrita */
+}
+
+.header-top img {
+	height: 8vh;
+}
+
+.header-top div {
+	display: flex;
+	flex-direction: row; /* Cambia a 'column' para ponerlos en columna */
+	justify-content: space-around; /* Alineación horizontal */
+	align-items: center; /* Alineación vertical */
+}
+
+.layout-header {
+	width: 100%;
+	display: flex;
+	flex-direction: row; /* Cambia a 'column' para ponerlos en columna */
+	justify-content: space-between; /* Alineación horizontal */
+	align-items: center; /* Alineación vertical */
+	height: var(--header-height);
+	padding: 5px 10px;
+}
+
+.ui-button .ui-button-text {
+    display: block;
+    line-height: normal;
+    
+    font-size: 12px ;
+}
+
+.ui-selectonemenu label.ui-selectonemenu-label {
+    cursor: pointer;
+    font-size: 10px !important;
+}
+.checkBoxGrid input{
+	font-size: 10px !important;
+}
+ 
+
+
+.ui-button  {
+border-radius: 8px !important;
+}
+
+.ui-inputfield {
+     outline: medium none;
+    padding: 4px;
+    font-weight: normal;
+}
+.checkBoxGrid label{
+	
+	 font-size: 13px !important;
+ }
+.header-content {
+	display: flex;
+	align-items: center;
+	gap: var(- -spacing-xl);
+	flex: 1;
+}
+
+.user-info {
+	margin: 0px;
+	height: var(- -header-height);
+	display: flex;
+	flex-direction: column;
+	/* Cambia a 'column' para ponerlos en columna */
+	justify-content: center; /*Alineación horizontal */
+	align-items: flex-start; /* Alineación vertical */
+	/*border: 2px dashed red;*/
+}
+
+.user-info-row span {
+	/*border: 2px dashed blue;*/
+	
+}
+
+.sp-gris {
+	color: white;
+	font-weight: bold;
+	display: inline-block;
+
+	/*border: 2px dashed blue;*/
+}
+
+/* ===== Menu componet   ===== */
+#formmenu {
+	background-color: #fff;
+	height: 100%;
+}
+
+/* ===== Media Queries (Responsive) ===== */
+@media ( max-width : 768px) {
+	:root { -
+		-sidebar-width: 200px; -
+		-header-height: 70px;
+	}
+	.header {
+		padding: 0 var(- -spacing-md);
+	}
+	.user-info {
+		flex-direction: column;
+		gap: var(- -spacing-sm);
+	}
+}

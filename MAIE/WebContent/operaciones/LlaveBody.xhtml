@@ -1,0 +1,284 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:p="http://primefaces.org/ui"
+    template="/plantilla/plantilla.xhtml">
+
+    <ui:define name="content">
+
+        <h:form id="formLlaveBody">
+            <p:messages id="messages" showDetail="true" closable="true" />
+
+            <h3>Mantenimiento de Llaves Body</h3>
+            <p>Gestión de las llaves que componen el body de Request y Response para cada operación.</p>
+
+            <p:tabView id="tabViewLlaveBody">
+                <p:ajax event="tabChange" listener="#{llaveBodyController.onTabChange}" update=":formLlaveBody:messages :formLlaveBody:tabViewLlaveBody" />
+
+                <p:tab title="Registrar Llaves Body" id="registerLlaveBodyTab">
+                    <!-- PrimeFaces Steps Component -->
+                    <p:steps activeIndex="#{llaveBodyController.activeRegisterStep}">
+                        <p:menuitem value="Selección de Operación" />
+                        <p:menuitem value="Registro de Llaves" />
+                        <p:menuitem value="Confirmación y Guardado" />
+                    </p:steps>
+                    
+                    <p:outputPanel id="registerStepsPanelLlaveBody">
+                        <!-- Step 1: Select Operation -->
+                        <h:panelGroup rendered="#{llaveBodyController.activeRegisterStep == 0}">
+                            <p:panel header="Seleccionar Operación para Registrar Llaves Body" style="margin-top: 20px;">
+                                <p:panelGrid columns="2" columnClasses="label,value" styleClass="ui-panelgrid-blank">
+                                    <p:outputLabel for="selectOperacionRegLlaveBody" value="Operación:" />
+                                   <p:selectOneMenu id="selectOperacionRegLlaveBody"
+                                        value="#{llaveBodyController.llaveBodyModel.selectedIdOperacion}"
+                                        required="true" converter="javax.faces.Long">
+                                        <f:selectItems value="#{llaveBodyController.operacionesAsSelectItems}" />
+                                    </p:selectOneMenu>
+
+                                    <p:outputLabel for="selectEntidadRegLlaveBody" value="Entidad:" />
+                                    <p:selectOneMenu id="selectEntidadRegLlaveBody"
+                                        value="#{llaveBodyController.llaveBodyModel.selectedIdEntidad}"
+                                        required="true">
+                                        <f:selectItems value="#{llaveBodyController.entidadesAsSelectItems}" />
+                                    </p:selectOneMenu>
+
+                                    <p:outputLabel for="selectTipoOrigenRegLlaveBody" value="Tipo de Origen:" />
+                                    <p:selectOneMenu id="selectTipoOrigenRegLlaveBody"
+                                        value="#{llaveBodyController.llaveBodyModel.selectedTipoOrigen}"
+                                        required="true" converter="javax.faces.Integer">
+                                        <f:selectItems value="#{llaveBodyController.tiposOrigenAsSelectItems}" />
+                                    </p:selectOneMenu>
+                                    
+                                    <p:outputLabel />
+                                    <p:commandButton value="Continuar" icon="fa fa-arrow-right"
+                                        actionListener="#{llaveBodyController.seleccionarOperacionYTipoOrigenParaRegistrar()}"
+                                        update=":formLlaveBody:messages :formLlaveBody:tabViewLlaveBody"
+                                        process="@this selectOperacionRegLlaveBody selectEntidadRegLlaveBody selectTipoOrigenRegLlaveBody" />
+                                </p:panelGrid>
+                            </p:panel>
+                        </h:panelGroup>
+
+                        <!-- Step 2: Register Fields -->
+                        <h:panelGroup rendered="#{llaveBodyController.activeRegisterStep == 1}">
+                            <p:panel id="registerContentPanelLlaveBody" header="Registrar Llaves Body para Operación: #{llaveBodyController.llaveBodyModel.operacionSeleccionadaDetalle.descripcion} (Entidad: #{llaveBodyController.llaveBodyModel.operacionSeleccionadaDetalle.idEntidad} - Tipo: #{llaveBodyController.llaveBodyModel.selectedTipoOrigen == 1 ? 'Request' : 'Response'})" 
+                                     style="margin-top: 20px;">
+                                <p:toolbar>
+                                    <p:toolbarGroup align="left">
+                                        <p:selectOneRadio value="#{llaveBodyController.llaveBodyModel.registroMode}" layout="lineDirection">
+                                            <f:selectItem itemLabel="Manual" itemValue="MANUAL" />
+                                            <f:selectItem itemLabel="Desde JSON" itemValue="JSON" />
+                                            <p:ajax update="registerContentPanelLlaveBody" />
+                                        </p:selectOneRadio>
+                                    </p:toolbarGroup>
+                                    <p:toolbarGroup align="right">
+                                        <p:commandButton value="Volver" icon="fa fa-arrow-left" actionListener="#{llaveBodyController.setActiveRegisterStep(0)}" 
+                                            update=":formLlaveBody:tabViewLlaveBody" process="@this" style="margin-right: 5px;"/>
+                                        <p:commandButton value="Confirmar Registro" icon="fa fa-check" 
+                                            actionListener="#{llaveBodyController.showConfirmSaveDialog()}" 
+                                            process="@this" update=":formLlaveBody:messages"
+                                            disabled="#{empty llaveBodyController.llaveBodyModel.llavesPendientesDeRegistro}"/>
+                                    </p:toolbarGroup>
+                                </p:toolbar>
+
+                                <!-- Registration options: Manual -->
+                                <h:panelGroup id="panelManualEntryLlaveBody" rendered="#{llaveBodyController.llaveBodyModel.registroMode == 'MANUAL'}" style="display: block; margin-top: 10px;">
+                                    <p:commandButton value="Agregar Llave Manual" icon="fa fa-plus" 
+                                        actionListener="#{llaveBodyController.prepararNuevaLlaveBodyManual()}" 
+                                        update=":formLlaveBody" oncomplete="PF('dlgManualEntryLlaveBody').show()" process="@this" resetValues="true" />
+                                </h:panelGroup>
+
+                                <!-- Registration options: JSON Upload -->
+                                <h:panelGroup id="panelJsonUploadLlaveBody" rendered="#{llaveBodyController.llaveBodyModel.registroMode == 'JSON'}" style="display: block; margin-top: 10px;">
+                                    <p:fileUpload fileUploadListener="#{llaveBodyController.handleJsonUpload}"
+                                        mode="advanced" dragDropSupport="false"
+                                        update=":formLlaveBody:messages, :formLlaveBody:tabViewLlaveBody"
+                                        allowTypes="/(\.json)$/" label="Seleccionar JSON"
+                                        uploadLabel="Procesar" cancelLabel="Cancelar" />
+                                </h:panelGroup>
+
+                                <h4>Llaves Pendientes de Registro</h4>
+                                <p:dataTable id="tablaLlavesPendientes" var="llave" value="#{llaveBodyController.llaveBodyModel.llavesPendientesDeRegistro}"
+                                    emptyMessage="No hay llaves body pendientes de registro." style="margin-top:10px;">
+                                    <p:column headerText="Tag Name"><h:outputText value="#{llave.tagName}" /></p:column>
+                                    <p:column headerText="Orden"><h:outputText value="#{llave.orden}" /></p:column>
+                                    <p:column headerText="Tipo Dato Esperado"><h:outputText value="#{llave.tipoDatoEsperado}" /></p:column>
+                                    <p:column headerText="Es Padre"><h:outputText value="#{llave.esPadre == 1 ? 'Sí' : 'No'}" /></p:column>
+                                    <p:column headerText="Obligatorio"><h:outputText value="#{llave.indObligatorio == 1 ? 'Sí' : 'No'}" /></p:column>
+                                    <p:column headerText="Mapeable"><h:outputText value="#{llave.indMapeable == 1 ? 'Sí' : 'No'}" /></p:column>
+                                    <p:column headerText="Descripción"><h:outputText value="#{llave.descripcion}" /></p:column>
+                                </p:dataTable>
+                            </p:panel>
+                        </h:panelGroup>
+                    </p:outputPanel>
+                </p:tab>
+
+                <p:tab title="Mostrar Llaves Body" id="viewLlaveBodyTab">
+                    <p:panel header="Visualizar Llaves Body" style="margin-top: 20px;">
+                        <p:panelGrid columns="2" columnClasses="label,value" styleClass="ui-panelgrid-blank">
+                            <p:outputLabel for="selectOperacionViewLlaveBody" value="Operación:" />
+                            <p:selectOneMenu id="selectOperacionViewLlaveBody"
+                                value="#{llaveBodyController.llaveBodyModel.selectedIdOperacion}"
+                                required="true" converter="javax.faces.Long">
+                                <f:selectItems value="#{llaveBodyController.operacionesAsSelectItems}" />
+                            </p:selectOneMenu>
+
+                            <p:outputLabel for="selectEntidadViewLlaveBody" value="Entidad:" />
+                            <p:selectOneMenu id="selectEntidadViewLlaveBody"
+                                value="#{llaveBodyController.llaveBodyModel.selectedIdEntidad}"
+                                required="true">
+                                <f:selectItems value="#{llaveBodyController.entidadesAsSelectItems}" />
+                            </p:selectOneMenu>
+
+                            <p:outputLabel for="selectTipoOrigenViewLlaveBody" value="Tipo de Origen:" />
+                            <p:selectOneMenu id="selectTipoOrigenViewLlaveBody"
+                                value="#{llaveBodyController.llaveBodyModel.selectedTipoOrigen}"
+                                required="true" converter="javax.faces.Integer">
+                                <f:selectItems value="#{llaveBodyController.tiposOrigenAsSelectItems}" />
+                            </p:selectOneMenu>
+                            
+                            <p:outputLabel />
+                            <p:commandButton value="Buscar Llaves" icon="fa fa-search"
+                                actionListener="#{llaveBodyController.cargarLlavesBodyParaVer()}"
+                                update=":formLlaveBody:messages :formLlaveBody:tabViewLlaveBody:viewContentPanelLlaveBody"
+                                process="@this selectOperacionViewLlaveBody selectEntidadViewLlaveBody selectTipoOrigenViewLlaveBody" />
+                        </p:panelGrid>
+
+                        <p:outputPanel id="viewContentPanelLlaveBody" style="margin-top: 20px;">
+                            <h4>Llaves Encontradas</h4>
+                            <p:dataTable id="tablaLlavesMostradas" var="llave" value="#{llaveBodyController.llaveBodyModel.listaLlavesBody}"
+                                emptyMessage="No se encontraron llaves body para los criterios seleccionados." style="margin-top:10px;">
+                                <p:column headerText="Tag Name"><h:outputText value="#{llave.tagName}" /></p:column>
+                                <p:column headerText="Orden"><h:outputText value="#{llave.orden}" /></p:column>
+                                <p:column headerText="Tipo Dato Esperado"><h:outputText value="#{llave.tipoDatoEsperado}" /></p:column>
+                                <p:column headerText="Es Padre"><h:outputText value="#{llave.esPadre == 1 ? 'Sí' : 'No'}" /></p:column>
+                                <p:column headerText="Obligatorio"><h:outputText value="#{llave.indObligatorio == 1 ? 'Sí' : 'No'}" /></p:column>
+                                <p:column headerText="Mapeable"><h:outputText value="#{llave.indMapeable == 1 ? 'Sí' : 'No'}" /></p:column>
+                                <p:column headerText="Descripción"><h:outputText value="#{llave.descripcion}" /></p:column>
+                                <p:column headerText="Acciones" style="width:100px; text-align: center;">
+                                    <p:commandButton icon="fa fa-edit" title="Editar" styleClass="ui-button-info"
+                                        actionListener="#{llaveBodyController.editarLlaveBody(llave)}"
+                                        update=":formLlaveBody" oncomplete="PF('dlgManualEntryLlaveBody').show()" process="@this" />
+                                </p:column>
+                            </p:dataTable>
+                        </p:outputPanel>
+                    </p:panel>
+                </p:tab>
+
+                <p:tab title="Editar Llaves Body" id="editLlaveBodyTab">
+                    <p:panel header="Contenido para Editar Llaves Body">
+                        <p>Similar a la vista, pero con opciones de edición directa.</p>
+                        <p:panelGrid columns="2" columnClasses="label,value" styleClass="ui-panelgrid-blank">
+                            <p:outputLabel for="selectOperacionEditLlaveBody" value="Operación:" />
+                            <p:selectOneMenu id="selectOperacionEditLlaveBody"
+                                value="#{llaveBodyController.llaveBodyModel.selectedIdOperacion}"
+                                required="true" converter="javax.faces.Long">
+                                <f:selectItems value="#{llaveBodyController.operacionesAsSelectItems}" />
+                            </p:selectOneMenu>
+
+                            <p:outputLabel for="selectEntidadEditLlaveBody" value="Entidad:" />
+                            <p:selectOneMenu id="selectEntidadEditLlaveBody"
+                                value="#{llaveBodyController.llaveBodyModel.selectedIdEntidad}"
+                                required="true">
+                                <f:selectItems value="#{llaveBodyController.entidadesAsSelectItems}" />
+                            </p:selectOneMenu>
+
+                            <p:outputLabel for="selectTipoOrigenEditLlaveBody" value="Tipo de Origen:" />
+                            <p:selectOneMenu id="selectTipoOrigenEditLlaveBody"
+                                value="#{llaveBodyController.llaveBodyModel.selectedTipoOrigen}"
+                                required="true" converter="javax.faces.Integer">
+                                <f:selectItems value="#{llaveBodyController.tiposOrigenAsSelectItems}" />
+                            </p:selectOneMenu>
+                            
+                            <p:outputLabel />
+                            <p:commandButton value="Buscar Llaves para Editar" icon="fa fa-search"
+                                actionListener="#{llaveBodyController.cargarLlavesBodyParaModificar()}"
+                                update=":formLlaveBody:messages :formLlaveBody:tabViewLlaveBody:editContentPanelLlaveBody"
+                                process="@this selectOperacionEditLlaveBody selectEntidadEditLlaveBody selectTipoOrigenEditLlaveBody" />
+                        </p:panelGrid>
+
+                        <p:outputPanel id="editContentPanelLlaveBody" style="margin-top: 20px;">
+                            <h4>Llaves para Modificar</h4>
+                            <p:dataTable id="tablaLlavesModificar" var="llave" value="#{llaveBodyController.llaveBodyModel.listaLlavesBody}"
+                                emptyMessage="No se encontraron llaves body para los criterios seleccionados." style="margin-top:10px;">
+                                <p:column headerText="Tag Name"><h:outputText value="#{llave.tagName}" /></p:column>
+                                <p:column headerText="Orden"><h:outputText value="#{llave.orden}" /></p:column>
+                                <p:column headerText="Tipo Dato Esperado"><h:outputText value="#{llave.tipoDatoEsperado}" /></p:column>
+                                <p:column headerText="Es Padre"><h:outputText value="#{llave.esPadre == 1 ? 'Sí' : 'No'}" /></p:column>
+                                <p:column headerText="Obligatorio"><h:outputText value="#{llave.indObligatorio == 1 ? 'Sí' : 'No'}" /></p:column>
+                                <p:column headerText="Mapeable"><h:outputText value="#{llave.indMapeable == 1 ? 'Sí' : 'No'}" /></p:column>
+                                <p:column headerText="Descripción"><h:outputText value="#{llave.descripcion}" /></p:column>
+                                <p:column headerText="Acciones" style="width:100px; text-align: center;">
+                                    <p:commandButton icon="fa fa-edit" title="Editar" styleClass="ui-button-info"
+                                        actionListener="#{llaveBodyController.editarLlaveBody(llave)}"
+                                        update=":formLlaveBody" oncomplete="PF('dlgManualEntryLlaveBody').show()" process="@this" />
+                                </p:column>
+                            </p:dataTable>
+                        </p:outputPanel>
+                    </p:panel>
+                </p:tab>
+
+            </p:tabView>
+
+            <!-- Dialog for Manual LlaveBody Entry/Edit -->
+            <p:dialog header="#{llaveBodyController.llaveBodyModel.modificacionLlaveBody ? 'Editar Llave Body' : 'Agregar Llave Body Manual'}" 
+                      widgetVar="dlgManualEntryLlaveBody" modal="true" resizable="false" closable="true" width="450">
+                <p:panelGrid columns="2" columnClasses="label,value">
+                    <p:outputLabel for="tagNameLlaveBodyManual" value="Tag Name:" />
+                    <p:inputText id="tagNameLlaveBodyManual" value="#{llaveBodyController.llaveBodyModel.llaveBodyEdicion.tagName}" required="true" />
+
+                    <p:outputLabel for="ordenLlaveBodyManual" value="Orden:" />
+                    <p:inputText id="ordenLlaveBodyManual" value="#{llaveBodyController.llaveBodyModel.llaveBodyEdicion.orden}" required="true" converter="javax.faces.Integer" />
+
+                    <p:outputLabel for="tipoDatoEsperadoLlaveBodyManual" value="Tipo Dato Esperado:" />
+                    <p:selectOneMenu id="tipoDatoEsperadoLlaveBodyManual" value="#{llaveBodyController.llaveBodyModel.llaveBodyEdicion.tipoDatoEsperado}" required="true" converter="javax.faces.Integer">
+                        <f:selectItems value="#{llaveBodyController.tiposDatoEsperadoAsSelectItems}" />
+                    </p:selectOneMenu>
+
+                    <p:outputLabel for="esPadreLlaveBodyManual" value="Es Padre:" />
+                    <p:selectOneMenu id="esPadreLlaveBodyManual" value="#{llaveBodyController.llaveBodyModel.llaveBodyEdicion.esPadre}" required="true" converter="javax.faces.Integer">
+                        <f:selectItems value="#{llaveBodyController.esPadreAsSelectItems}" />
+                    </p:selectOneMenu>
+
+                    <p:outputLabel for="idLlavePadreLlaveBodyManual" value="ID Llave Padre:" />
+                    <p:inputText id="idLlavePadreLlaveBodyManual" value="#{llaveBodyController.llaveBodyModel.llaveBodyEdicion.idLlavePadre}" converter="javax.faces.Long" />
+
+                    <p:outputLabel for="indObligatorioLlaveBodyManual" value="Obligatorio:" />
+                    <p:selectOneMenu id="indObligatorioLlaveBodyManual" value="#{llaveBodyController.llaveBodyModel.llaveBodyEdicion.indObligatorio}" converter="javax.faces.Integer">
+                        <f:selectItems value="#{llaveBodyController.indObligatorioAsSelectItems}" />
+                    </p:selectOneMenu>
+
+                    <p:outputLabel for="indMapeableLlaveBodyManual" value="Mapeable:" />
+                    <p:selectOneMenu id="indMapeableLlaveBodyManual" value="#{llaveBodyController.llaveBodyModel.llaveBodyEdicion.indMapeable}" converter="javax.faces.Integer">
+                        <f:selectItems value="#{llaveBodyController.indMapeableAsSelectItems}" />
+                    </p:selectOneMenu>
+
+                    <p:outputLabel for="valorDefectoLlaveBodyManual" value="Valor por Defecto:" />
+                    <p:inputText id="valorDefectoLlaveBodyManual" value="#{llaveBodyController.llaveBodyModel.llaveBodyEdicion.valorDefecto}" />
+
+                    <p:outputLabel for="descripcionLlaveBodyManual" value="Descripción:" />
+                    <p:inputTextarea id="descripcionLlaveBodyManual" value="#{llaveBodyController.llaveBodyModel.llaveBodyEdicion.descripcion}" rows="3" cols="30" autoResize="false" />
+                </p:panelGrid>
+                <p:commandButton value="#{llaveBodyController.llaveBodyModel.modificacionLlaveBody ? 'Guardar Cambios' : 'Agregar'}" 
+                    icon="fa fa-plus"
+                    actionListener="#{llaveBodyController.handleSaveOrAddLlaveBody()}"
+                    update=":formLlaveBody:messages :formLlaveBody:tabViewLlaveBody"
+                    oncomplete="if (!args.validationFailed) PF('dlgManualEntryLlaveBody').hide();"
+                    resetValues="true" />
+            </p:dialog>
+
+            <!-- Confirm Save Dialog -->
+            <p:confirmDialog message="¿Está seguro de registrar todas las llaves body pendientes?" header="Confirmar Registro" severity="warn" widgetVar="dlgConfirmSaveLlaveBody">
+                <p:commandButton value="Sí" 
+                icon="fa fa-check" immediate="true"
+                actionListener="#{llaveBodyController.confirmarRegistroLlavesBody()}" 
+                    update=":formLlaveBody:messages :formLlaveBody:tabViewLlaveBody" oncomplete="PF('dlgConfirmSaveLlaveBody').hide();" />
+                
+                <p:commandButton value="No" icon="fa fa-times" onclick="PF('dlgConfirmSaveLlaveBody').hide();" type="button" />
+            </p:confirmDialog>
+
+        </h:form>
+
+    </ui:define>
+
+</ui:composition>

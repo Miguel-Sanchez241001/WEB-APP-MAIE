@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="pe.com.bn.maie.persistencia.mapper.internal.EntidadMapper">
+
+    <resultMap id="entidadResultMap" type="pe.com.bn.maie.persistencia.dto.Entidad">
+        <id property="idEntidad" column="B01_ID_ENTIDAD" />
+        <result property="descripcion" column="B01_DESCRIPCION" />
+        <result property="tipoComunicacion" column="B01_TIPO_COMUNICACION" />
+        <result property="tipoTramaBn" column="B01_TIPO_TRAMA_BN" />
+        <result property="tipoTramaEx" column="B01_TIPO_TRAMA_EX" />
+        <result property="indMapeo" column="B01_IND_MAPEO" />
+        <result property="estado" column="B01_ESTADO" />
+        <result property="usuarioCreacion" column="B01_USU_CRE" />
+        <result property="fechaCreacion" column="B01_FEC_CRE" />
+        <result property="usuarioModificacion" column="B01_USU_MOD" />
+        <result property="fechaModificacion" column="B01_FEC_MOD" />
+    </resultMap>
+
+    <!-- Para SP_02_SELECCIONAR_TODAS -->
+    <select id="seleccionarEntidades" statementType="CALLABLE" parameterType="java.util.Map" resultMap="entidadResultMap">
+        {call BN_MAIE.BNPKG_MAIE_ENTIDAD01.SP_02_SELECCIONAR_TODAS(
+            #{o_cursor, mode=OUT, jdbcType=CURSOR, resultMap=entidadResultMap},
+            #{code_rpta, mode=OUT, jdbcType=VARCHAR},
+            #{desc_rpta, mode=OUT, jdbcType=VARCHAR}
+        )}
+    </select>
+
+    <!-- Para SP_01_BUSCAR_POR_ID -->
+    <select id="buscarEntidad" parameterType="java.util.Map" statementType="CALLABLE">
+        {call BN_MAIE.BNPKG_MAIE_ENTIDAD01.SP_01_BUSCAR_POR_ID(
+            #{p_b01_id_entidad, mode=IN, jdbcType=VARCHAR, javaType=String},
+            #{o_cursor, mode=OUT, jdbcType=CURSOR, resultMap=entidadResultMap},
+            #{code_rpta, mode=OUT, jdbcType=VARCHAR},
+            #{desc_rpta, mode=OUT, jdbcType=VARCHAR}
+        )}
+    </select>
+
+    <!-- Para SP_03_ACTUALIZAR -->
+    <update id="actualizarEntidad" parameterType="java.util.Map" statementType="CALLABLE">
+        {call BN_MAIE.BNPKG_MAIE_ENTIDAD01.SP_03_ACTUALIZAR(
+            #{p_b01_id_entidad, mode=IN, jdbcType=VARCHAR, javaType=String},
+            #{p_b01_descripcion, mode=IN, jdbcType=VARCHAR, javaType=String},
+            #{p_b01_tipo_comunicacion, mode=IN, jdbcType=NUMERIC, javaType=Integer},
+            #{p_b01_tipo_trama_bn, mode=IN, jdbcType=NUMERIC, javaType=Integer},
+            #{p_b01_tipo_trama_ex, mode=IN, jdbcType=NUMERIC, javaType=Integer},
+            #{p_b01_ind_mapeo, mode=IN, jdbcType=NUMERIC, javaType=Integer},
+            #{p_b01_estado, mode=IN, jdbcType=NUMERIC, javaType=Integer},
+            #{p_b01_usu_mod, mode=IN, jdbcType=VARCHAR, javaType=String},
+            #{o_code_rpta, mode=OUT, jdbcType=VARCHAR},
+            #{o_desc_rpta, mode=OUT, jdbcType=VARCHAR}
+        )}
+    </update>
+
+    <!-- Para SP_04_INSERTAR -->
+    <insert id="insertarEntidad" parameterType="java.util.Map" statementType="CALLABLE">
+        {call BN_MAIE.BNPKG_MAIE_ENTIDAD01.SP_04_INSERTAR(
+            #{p_b01_id_entidad, mode=IN, jdbcType=VARCHAR, javaType=String},
+            #{p_b01_descripcion, mode=IN, jdbcType=VARCHAR, javaType=String},
+            #{p_b01_tipo_comunicacion, mode=IN, jdbcType=NUMERIC, javaType=Integer},
+            #{p_b01_tipo_trama_bn, mode=IN, jdbcType=NUMERIC, javaType=Integer},
+            #{p_b01_tipo_trama_ex, mode=IN, jdbcType=NUMERIC, javaType=Integer},
+            #{p_b01_ind_mapeo, mode=IN, jdbcType=NUMERIC, javaType=Integer},
+            #{p_b01_estado, mode=IN, jdbcType=NUMERIC, javaType=Integer},
+            #{p_b01_usu_cre, mode=IN, jdbcType=VARCHAR, javaType=String},
+            #{o_code_rpta, mode=OUT, jdbcType=VARCHAR},
+            #{o_desc_rpta, mode=OUT, jdbcType=VARCHAR}
+        )}
+    </insert>
+
+    <!-- Para SP_01_BUSCAR_POR_ID (renombrado de SP_05_BUSCAR_ENTIDAD_ID) -->
+    <select id="buscarEntidadId" parameterType="java.util.Map" statementType="CALLABLE">
+        {call BN_MAIE.BNPKG_MAIE_ENTIDAD01.SP_01_BUSCAR_POR_ID(
+            #{p_b01_id_entidad, mode=IN, jdbcType=VARCHAR, javaType=String},
+            #{o_cursor, mode=OUT, jdbcType=CURSOR, resultMap=entidadResultMap},
+            #{code_rpta, mode=OUT, jdbcType=VARCHAR},
+            #{desc_rpta, mode=OUT, jdbcType=VARCHAR}
+        )}
+    </select>
+
+</mapper>

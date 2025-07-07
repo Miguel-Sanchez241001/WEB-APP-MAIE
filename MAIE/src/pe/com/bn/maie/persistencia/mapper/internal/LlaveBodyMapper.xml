@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="pe.com.bn.maie.persistencia.mapper.internal.LlaveBodyMapper">
+
+    <resultMap id="llaveBodyResultMap" type="pe.com.bn.maie.persistencia.dto.LlaveBody">
+        <id property="idLlaveBody" column="B09_ID_LLAVE_BODY" />
+        <result property="idOperacion" column="B02_ID_OPERACION" />
+        <result property="idEntidad" column="B01_ID_ENTIDAD" />
+        <result property="tagName" column="B09_TAG_NAME" />
+        <result property="tipoOrigen" column="B09_TIPO_ORIGEN" />
+        <result property="idLlavePadre" column="B09_ID_LLAVE_PADRE" />
+        <result property="tipoDatoEsperado" column="B09_TIPO_DATO_ESPERADO" />
+        <result property="esPadre" column="B09_ES_PADRE" />
+        <result property="valorDefecto" column="B09_VALOR_DEFECTO" />
+        <result property="orden" column="B09_ORDEN" />
+        <result property="indObligatorio" column="B09_IND_OBLIGATORIO" />
+        <result property="descripcion" column="B09_DESCRIPCION" />
+        <result property="indMapeable" column="B09_IND_MAPEABLE" />
+        <result property="usuarioCreacion" column="B09_USU_CRE" />
+        <result property="fechaCreacion" column="B09_FEC_CRE" />
+        <result property="usuarioModificacion" column="B09_USU_MOD" />
+        <result property="fechaModificacion" column="B09_FEC_MOD" />
+    </resultMap>
+
+    <!-- SP_01: Buscar llave de cuerpo por su ID -->
+    <select id="buscarLlaveBody" parameterType="java.util.Map" resultMap="llaveBodyResultMap" statementType="CALLABLE">
+        {call BN_MAIE.BNPKG_MAIE_LLAVE_BODY09.SP_01_BUSCAR_LLAVE_BODY(
+            #{p_b09_id_llave_body, mode=IN, jdbcType=NUMERIC, javaType=Long},
+            #{o_cursor, mode=OUT, jdbcType=CURSOR, resultMap=llaveBodyResultMap},
+            #{code_rpta, mode=OUT, jdbcType=VARCHAR},
+            #{desc_rpta, mode=OUT, jdbcType=VARCHAR}
+        )}
+    </select>
+
+    <!-- SP_02: Listar todas las llaves de cuerpo -->
+    <select id="seleccionarLlavesBody" statementType="CALLABLE" parameterType="java.util.Map" resultMap="llaveBodyResultMap">
+        {call BN_MAIE.BNPKG_MAIE_LLAVE_BODY09.SP_02_SELECCIONAR_LLAVES_BODY(
+            #{o_cursor, mode=OUT, jdbcType=CURSOR, resultMap=llaveBodyResultMap},
+            #{code_rpta, mode=OUT, jdbcType=VARCHAR},
+            #{desc_rpta, mode=OUT, jdbcType=VARCHAR}
+        )}
+    </select>
+
+    <!-- SP_03: Actualizar llave de cuerpo -->
+    <update id="actualizarLlaveBody" parameterType="java.util.Map" statementType="CALLABLE">
+        {call BN_MAIE.BNPKG_MAIE_LLAVE_BODY09.SP_03_ACTUALIZAR_LLAVE_BODY(
+            #{p_b09_id_llave_body, mode=IN, jdbcType=NUMERIC, javaType=Long},
+            #{p_b02_id_operacion, mode=IN, jdbcType=NUMERIC, javaType=Long},
+            #{p_b01_id_entidad, mode=IN, jdbcType=VARCHAR, javaType=String},
+            #{p_b09_tag_name, mode=IN, jdbcType=VARCHAR, javaType=String},
+            #{p_b09_tipo_origen, mode=IN, jdbcType=NUMERIC, javaType=Integer},
+            #{p_b09_id_llave_padre, mode=IN, jdbcType=NUMERIC, javaType=Long},
+            #{p_b09_tipo_dato_esperado, mode=IN, jdbcType=NUMERIC, javaType=Integer},
+            #{p_b09_es_padre, mode=IN, jdbcType=NUMERIC, javaType=Integer},
+            #{p_b09_valor_defecto, mode=IN, jdbcType=VARCHAR, javaType=String},
+            #{p_b09_orden, mode=IN, jdbcType=NUMERIC, javaType=Integer},
+            #{p_b09_ind_obligatorio, mode=IN, jdbcType=NUMERIC, javaType=Integer},
+            #{p_b09_descripcion, mode=IN, jdbcType=VARCHAR, javaType=String},
+            #{p_b09_ind_mapeable, mode=IN, jdbcType=NUMERIC, javaType=Integer},
+            #{p_b09_usu_mod, mode=IN, jdbcType=VARCHAR, javaType=String},
+            #{code_rpta, mode=OUT, jdbcType=VARCHAR},
+            #{desc_rpta, mode=OUT, jdbcType=VARCHAR}
+        )}
+    </update>
+
+    <!-- SP_04: Insertar una nueva llave de cuerpo -->
+    <insert id="insertarLlaveBody" parameterType="java.util.Map" statementType="CALLABLE">
+        {call BN_MAIE.BNPKG_MAIE_LLAVE_BODY09.SP_04_INSERTAR_LLAVE_BODY(
+            #{p_b02_id_operacion, mode=IN, jdbcType=NUMERIC, javaType=Long},
+            #{p_b01_id_entidad, mode=IN, jdbcType=VARCHAR, javaType=String},
+            #{p_b09_tag_name, mode=IN, jdbcType=VARCHAR, javaType=String},
+            #{p_b09_tipo_origen, mode=IN, jdbcType=NUMERIC, javaType=Integer},
+            #{p_b09_id_llave_padre, mode=IN, jdbcType=NUMERIC, javaType=Long},
+            #{p_b09_tipo_dato_esperado, mode=IN, jdbcType=NUMERIC, javaType=Integer},
+            #{p_b09_es_padre, mode=IN, jdbcType=NUMERIC, javaType=Integer},
+            #{p_b09_valor_defecto, mode=IN, jdbcType=VARCHAR, javaType=String},
+            #{p_b09_orden, mode=IN, jdbcType=NUMERIC, javaType=Integer},
+            #{p_b09_ind_obligatorio, mode=IN, jdbcType=NUMERIC, javaType=Integer},
+            #{p_b09_descripcion, mode=IN, jdbcType=VARCHAR, javaType=String},
+            #{p_b09_ind_mapeable, mode=IN, jdbcType=NUMERIC, javaType=Integer},
+            #{p_b09_usu_cre, mode=IN, jdbcType=VARCHAR, javaType=String},
+            #{o_b09_id_llave_body, mode=OUT, jdbcType=NUMERIC, javaType=Long},
+            #{code_rpta, mode=OUT, jdbcType=VARCHAR},
+            #{desc_rpta, mode=OUT, jdbcType=VARCHAR}
+        )}
+    </insert>
+
+    <!-- SP_05: Buscar llaves de cuerpo por Operación, Entidad y opcionalmente por llave padre y tipo de origen -->
+    <select id="buscarLlavesPorOperacion" parameterType="java.util.Map" resultMap="llaveBodyResultMap" statementType="CALLABLE">
+        {call BN_MAIE.BNPKG_MAIE_LLAVE_BODY09.SP_05_BUSCAR_LLAVES_POR_OPERACION(
+            #{p_b02_id_operacion, mode=IN, jdbcType=NUMERIC, javaType=Long},
+            #{p_b01_id_entidad, mode=IN, jdbcType=VARCHAR, javaType=String},
+            #{p_b09_tipo_origen, mode=IN, jdbcType=NUMERIC, javaType=Integer},
+            #{p_b09_id_llave_padre, mode=IN, jdbcType=NUMERIC, javaType=Long},
+            #{o_cursor, mode=OUT, jdbcType=CURSOR, resultMap=llaveBodyResultMap},
+            #{code_rpta, mode=OUT, jdbcType=VARCHAR},
+            #{desc_rpta, mode=OUT, jdbcType=VARCHAR}
+        )}
+    </select>
+
+</mapper>

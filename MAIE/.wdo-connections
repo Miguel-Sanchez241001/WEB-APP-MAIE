@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<connections:connections xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:connections="http://www.ibm.com/websphere/wdo/connections">
+  <connection id="orades">
+    <development xsi:type="connections:rsc-live-connection" id="orades_dev" name="orades"/>
+    <runtime xsi:type="connections:datasource-connection" auto-deploy="true" class-location="D:\oracleDriver\ojdbc6.jar" id="orades_runtime" classname="oracle.jdbc.pool.OracleConnectionPoolDataSource" database-name="orades" jndi-name="jdbc/orades" port-number="1521" resource-reference-name="orades" server-name="10.7.12.177" sql-vendor-type="75" userid="bn_sate"/>
+  </connection>
+</connections:connections>

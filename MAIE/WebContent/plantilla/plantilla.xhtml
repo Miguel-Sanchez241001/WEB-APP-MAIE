@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:p="http://primefaces.org/ui">
+
+<f:view contentType="text/html" id="fview">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <link rel="stylesheet" 
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <title>Administracion de Interfaces Externas</title>
+    <link rel="shortcut icon" type="image/x-icon" href="#{request.contextPath}/resources/img/favicon.ico" />
+    <ui:debug />
+    <f:metadata>
+        <ui:insert name="metadata" />
+    </f:metadata>
+
+<h:head>
+    <h:outputStylesheet library="css" name="layout.css"/>
+    <h:outputStylesheet library="css" name="header.css"/>
+    <h:outputStylesheet library="css" name="menu.css"/>
+     <script>
+ 
+  </script>
+ </h:head>
+
+    <h:body>
+        <div class="container">
+            <div class="header-top">
+               <span>Consola de Administración de Interfases</span>
+               <div>
+                 <img src="#{request.contextPath}/resources/img/logo_bn.png"></img>
+               	<span>Banco de la Nacion</span>
+               </div>
+               
+            </div>
+        
+            <!-- Header -->
+            <div class="header">
+                <ui:include src="header.xhtml" />
+            </div>
+            
+            <!-- Contenido principal -->
+            <div class="main-content">
+                <!-- Menú lateral -->
+                <div class="menu-lateral">
+                    <ui:include src="menu.xhtml" />
+                </div>
+                
+                <!-- Contenido dinámico -->
+                <div class="contenido-principal">
+                    <ui:insert name="content" />
+                </div>
+            </div>
+        </div>
+      
+
+        <script type="text/javascript">
+            // Inicializaciones JavaScript si son necesarias
+        </script>
+        
+    </h:body>
+</f:view>
+</html>

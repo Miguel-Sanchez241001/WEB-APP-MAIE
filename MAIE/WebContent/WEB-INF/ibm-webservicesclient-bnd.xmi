@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<com.ibm.etools.webservice.wscbnd:ClientBinding
+	xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI"
+	xmlns:com.ibm.etools.webservice.wscbnd="http://www.ibm.com/websphere/appserver/schemas/5.0.2/wscbnd.xmi"
+	xmi:id="ClientBinding_1751488562462">
+	<serviceRefs xmi:id="ServiceRef_1751488562462"
+		serviceRefLink="service/AutenticaRegService">
+		<portQnameBindings
+			xmi:id="PortQnameBinding_1751488562462"
+			portQnameNamespaceLink="http://service.seguridad"
+			portQnameLocalNameLink="AutenticaReg"
+			overriddenEndpointURI="http://srv1dwso26.bn.com.pe:80/WSClaveHost/services/AutenticaReg" />
+	</serviceRefs>
+</com.ibm.etools.webservice.wscbnd:ClientBinding>

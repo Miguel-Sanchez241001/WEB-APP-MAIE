@@ -1,0 +1,229 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:p="http://primefaces.org/ui"
+    template="/plantilla/plantilla.xhtml">
+
+    <ui:define name="content">
+
+        <h:form id="formCamposTrama">
+            <p:messages id="messages" showDetail="true" closable="true" />
+
+            <h3>Mantenimiento de Campos de Trama</h3>
+            <p>Gestión de los campos que componen las tramas de Request y Response para cada operación.</p>
+
+            <p:tabView id="tabViewPrincipal">
+                <p:ajax event="tabChange" listener="#{camposTramaController.onTabChange}" update=":formCamposTrama:messages :formCamposTrama:tabViewPrincipal" />
+
+                <p:tab title="Registrar Campos" id="registerTab">
+                    <!-- PrimeFaces Steps Component -->
+                    <p:steps activeIndex="#{camposTramaController.activeRegisterStep}">
+                        <p:menuitem value="Selección de Operación" />
+                        <p:menuitem value="Registro de Campos" />
+                        <p:menuitem value="Confirmación y Guardado" />
+                    </p:steps>
+                    
+                    <p:outputPanel id="registerStepsPanel">
+                        <!-- Step 1: Select Operation -->
+                        <h:panelGroup rendered="#{camposTramaController.activeRegisterStep == 0}">
+                            <p:panel header="Seleccionar Operación para Registrar" style="margin-top: 20px;">
+                                <p:panelGrid columns="2" columnClasses="label,value" styleClass="ui-panelgrid-blank">
+                                    <p:outputLabel for="selectOperacionReg" value="Operación:" />
+                                   <p:selectOneMenu id="selectOperacionReg"
+                                        value="#{camposTramaController.camposTramaModel.selectedIdOperacion}"
+                                        required="true" converter="javax.faces.Long">
+                                        <f:selectItems value="#{camposTramaController.operacionesAsSelectItems}" />
+                                    </p:selectOneMenu>
+
+                                    <p:outputLabel for="selectEntidadReg" value="Entidad:" />
+                                    <p:selectOneMenu id="selectEntidadReg"
+                                        value="#{camposTramaController.camposTramaModel.selectedIdEntidad}"
+                                        required="true">
+                                        <f:selectItems value="#{camposTramaController.entidadesAsSelectItems}" />
+                                    </p:selectOneMenu>
+
+                                    <p:outputLabel for="selectTipoOrigenReg" value="Tipo de Origen:" />
+                                    <p:selectOneMenu id="selectTipoOrigenReg"
+                                        value="#{camposTramaController.camposTramaModel.selectedTipoOrigen}"
+                                        required="true" converter="javax.faces.Integer">
+                                        <f:selectItems value="#{camposTramaController.tiposOrigenAsSelectItems}" />
+                                    </p:selectOneMenu>
+                                    
+                                    <p:outputLabel />
+                                    <p:commandButton value="Continuar" icon="fa fa-arrow-right"
+                                        actionListener="#{camposTramaController.seleccionarOperacionYTipoOrigenParaRegistrar()}"
+                                        update=":formCamposTrama:messages :formCamposTrama:tabViewPrincipal"
+                                        process="@this selectOperacionReg selectEntidadReg selectTipoOrigenReg" />
+                                </p:panelGrid>
+                            </p:panel>
+                        </h:panelGroup>
+
+                        <!-- Step 2: Register Fields -->
+                        <h:panelGroup rendered="#{camposTramaController.activeRegisterStep == 1}">
+                            <p:panel id="registerContentPanel" header="Registrar Campos para Operación: #{camposTramaController.camposTramaModel.operacionSeleccionadaDetalle.descripcion} (Entidad: #{camposTramaController.camposTramaModel.operacionSeleccionadaDetalle.idEntidad} - Tipo: #{camposTramaController.camposTramaModel.selectedTipoOrigen == 1 ? 'Request' : 'Response'})" 
+                                     style="margin-top: 20px;">
+                                <p:toolbar>
+                                    <p:toolbarGroup align="left">
+                                        <p:selectOneRadio value="#{camposTramaController.camposTramaModel.registroMode}" layout="lineDirection">
+                                            <f:selectItem itemLabel="Manual" itemValue="MANUAL" />
+                                            <f:selectItem itemLabel="Desde Copybook" itemValue="COPYBOOK" />
+                                            <!-- Updated to target registerContentPanel, which is always rendered when activeRegisterStep == 1 -->
+                                            <p:ajax update="registerContentPanel" />
+                                        </p:selectOneRadio>
+                                    </p:toolbarGroup>
+                                    <p:toolbarGroup align="right">
+                                        <p:commandButton value="Volver" icon="fa fa-arrow-left" actionListener="#{camposTramaController.setActiveRegisterStep(0)}" 
+                                            update=":formCamposTrama:tabViewPrincipal" process="@this" style="margin-right: 5px;"/>
+                                        <p:commandButton value="Confirmar Registro" icon="fa fa-check" 
+                                            actionListener="#{camposTramaController.showConfirmSaveDialog()}" 
+                                            process="@this" update=":formCamposTrama:messages"
+                                            disabled="#{empty camposTramaController.camposTramaModel.camposPendientesDeRegistro}"/>
+                                    </p:toolbarGroup>
+                                </p:toolbar>
+
+                                <!-- Registration options: Manual -->
+                                <h:panelGroup id="panelManualEntry" rendered="#{camposTramaController.camposTramaModel.registroMode == 'MANUAL'}" style="display: block; margin-top: 10px;">
+                                    <p:commandButton value="Agregar Campo Manual" icon="fa fa-plus" 
+                                        actionListener="#{camposTramaController.prepararNuevoCampoManual()}" 
+                                        update=":formCamposTramay" oncomplete="PF('dlgManualEntry').show()" process="@this" resetValues="true" />
+                                </h:panelGroup>
+
+                                <!-- Registration options: Copybook -->
+                                <h:panelGroup id="panelCopybookUpload" rendered="#{camposTramaController.camposTramaModel.registroMode == 'COPYBOOK'}" style="display: block; margin-top: 10px;">
+                                    <p:fileUpload fileUploadListener="#{camposTramaController.handleCopybookUpload}"
+                                        mode="advanced" dragDropSupport="false"
+                                        update=":formCamposTrama:messages, :formCamposTrama:tabViewPrincipal:registerStepsPanel:registerContentPanel:tablaCamposPendientes"
+                                        allowTypes="/(\.txt|\.cpy)$/" label="Seleccionar Copybook"
+                                        uploadLabel="Procesar" cancelLabel="Cancelar" />
+                                </h:panelGroup>
+
+                                <h4>Campos Pendientes de Registro</h4>
+                                <p:dataTable id="tablaCamposPendientes" var="campo" value="#{camposTramaController.camposTramaModel.camposPendientesDeRegistro}"
+                                    emptyMessage="No hay campos pendientes de registro." style="margin-top:10px;">
+                                    <p:column headerText="Tag Name"><h:outputText value="#{campo.tagName}" /></p:column>
+                                    <p:column headerText="Orden"><h:outputText value="#{campo.orden}" /></p:column>
+                                    <p:column headerText="Tipo Campo"><h:outputText value="#{campo.tipoCampo == 1 ? 'Cadena' : (campo.tipoCampo == 2 ? 'Entero' : (campo.tipoCampo == 3 ? 'Decimal' : ''))}" /></p:column>
+                                    <p:column headerText="Tipo Dato"><h:outputText value="#{campo.tipoDato}" /></p:column>
+                                    <p:column headerText="Longitud"><h:outputText value="#{campo.longitud}" /></p:column>
+                                    <p:column headerText="Alineación"><h:outputText value="#{campo.alineacion == 1 ? 'Derecha' : (campo.alineacion == 2 ? 'Izquierda' : '')}" /></p:column>
+                                </p:dataTable>
+                            </p:panel>
+                        </h:panelGroup>
+                    </p:outputPanel>
+                </p:tab>
+
+                <p:tab title="Mostrar Campos" id="viewTab">
+                    <p:panel header="Visualizar Campos de Trama" style="margin-top: 20px;">
+                        <p:panelGrid columns="2" columnClasses="label,value" styleClass="ui-panelgrid-blank">
+                            <p:outputLabel for="selectOperacionView" value="Operación:" />
+                            <p:selectOneMenu id="selectOperacionView"
+                                value="#{camposTramaController.camposTramaModel.selectedIdOperacion}"
+                                required="true" converter="javax.faces.Long">
+                                <f:selectItems value="#{camposTramaController.operacionesAsSelectItems}" />
+                            </p:selectOneMenu>
+
+                            <p:outputLabel for="selectEntidadView" value="Entidad:" />
+                            <p:selectOneMenu id="selectEntidadView"
+                                value="#{camposTramaController.camposTramaModel.selectedIdEntidad}"
+                                required="true">
+                                <f:selectItems value="#{camposTramaController.entidadesAsSelectItems}" />
+                            </p:selectOneMenu>
+
+                            <p:outputLabel for="selectTipoOrigenView" value="Tipo de Origen:" />
+                            <p:selectOneMenu id="selectTipoOrigenView"
+                                value="#{camposTramaController.camposTramaModel.selectedTipoOrigen}"
+                                required="true" converter="javax.faces.Integer">
+                                <f:selectItems value="#{camposTramaController.tiposOrigenAsSelectItems}" />
+                            </p:selectOneMenu>
+                            
+                            <p:outputLabel />
+                            <p:commandButton value="Buscar Campos" icon="fa fa-search"
+                                actionListener="#{camposTramaController.cargarCamposParaVer()}"
+                                update=":formCamposTrama:messages :formCamposTrama:tabViewPrincipal:viewContentPanel"
+                                process="@this selectOperacionView selectEntidadView selectTipoOrigenView" />
+                        </p:panelGrid>
+
+                        <p:outputPanel id="viewContentPanel" style="margin-top: 20px;">
+                            <h4>Campos Encontrados</h4>
+                            <p:dataTable id="tablaCamposMostrados" var="campo" value="#{camposTramaController.camposTramaModel.listaCamposTrama}"
+                                emptyMessage="No se encontraron campos para los criterios seleccionados." style="margin-top:10px;">
+                                <p:column headerText="Tag Name"><h:outputText value="#{campo.tagName}" /></p:column>
+                                <p:column headerText="Orden"><h:outputText value="#{campo.orden}" /></p:column>
+                                <p:column headerText="Tipo Campo"><h:outputText value="#{campo.tipoCampo == 1 ? 'Cadena' : (campo.tipoCampo == 2 ? 'Entero' : (campo.tipoCampo == 3 ? 'Decimal' : ''))}" /></p:column>
+                                <p:column headerText="Tipo Dato"><h:outputText value="#{campo.tipoDato}" /></p:column>
+                                <p:column headerText="Longitud"><h:outputText value="#{campo.longitud}" /></p:column>
+                                <p:column headerText="Alineación"><h:outputText value="#{campo.alineacion == 1 ? 'Derecha' : (campo.alineacion == 2 ? 'Izquierda' : '')}" /></p:column>
+                                <p:column headerText="Acciones" style="width:100px; text-align: center;">
+                                    <p:commandButton icon="fa fa-edit" title="Editar" styleClass="ui-button-info"
+                                        actionListener="#{camposTramaController.editarCampoTrama(campo)}"
+                                        update=":formCamposTrama" oncomplete="PF('dlgManualEntry').show()" process="@this" />
+                                </p:column>
+                            </p:dataTable>
+                        </p:outputPanel>
+                    </p:panel>
+                </p:tab>
+
+            </p:tabView>
+
+            <!-- Dialogs -->
+            <p:dialog header="#{camposTramaController.camposTramaModel.modificacionCampoTrama ? 'Editar Campo' : 'Agregar Campo Manual'}" 
+                      widgetVar="dlgManualEntry" modal="true" resizable="false" closable="true" width="450">
+                <p:panelGrid columns="2" columnClasses="label,value">
+                    <p:outputLabel for="tagNameManual" value="Tag Name:" />
+                    <p:inputText id="tagNameManual" value="#{camposTramaController.camposTramaModel.campoTramaEdicion.tagName}" required="true" />
+
+                    <p:outputLabel for="ordenManual" value="Orden:" />
+                    <p:inputText id="ordenManual" value="#{camposTramaController.camposTramaModel.campoTramaEdicion.orden}" converter="javax.faces.Integer" />
+
+                    <p:outputLabel for="tipoCampoManual" value="Tipo Campo:" />
+                    <p:selectOneMenu id="tipoCampoManual" value="#{camposTramaController.camposTramaModel.campoTramaEdicion.tipoCampo}" required="true" converter="javax.faces.Integer">
+                        <f:selectItems value="#{camposTramaController.tiposCampoAsSelectItems}" />
+                    </p:selectOneMenu>
+
+                    <p:outputLabel for="tipoDatoManual" value="Tipo Dato:" />
+                    <p:selectOneMenu id="tipoDatoManual" value="#{camposTramaController.camposTramaModel.campoTramaEdicion.tipoDato}" required="true">
+                        <f:selectItems value="#{camposTramaController.tiposDatoAsSelectItems}" />
+                    </p:selectOneMenu>
+
+                    <p:outputLabel for="longitudManual" value="Longitud:" />
+                    <p:inputText id="longitudManual" value="#{camposTramaController.camposTramaModel.campoTramaEdicion.longitud}" required="true" converter="javax.faces.Integer" />
+
+                    <p:outputLabel for="indRellenoManual" value="Indicador Relleno:" />
+                    <p:selectOneMenu id="indRellenoManual" value="#{camposTramaController.camposTramaModel.campoTramaEdicion.indRelleno}" converter="javax.faces.Integer">
+                        <f:selectItems value="#{camposTramaController.indicadorRellenoAsSelectItems}" />
+                    </p:selectOneMenu>
+
+                    <p:outputLabel for="valorRellenoManual" value="Valor Relleno:" />
+                    <p:inputText id="valorRellenoManual" value="#{camposTramaController.camposTramaModel.campoTramaEdicion.valorRelleno}" />
+
+                    <p:outputLabel for="valorDefectoManual" value="Valor por Defecto:" />
+                    <p:inputText id="valorDefectoManual" value="#{camposTramaController.camposTramaModel.campoTramaEdicion.valorDefecto}" />
+
+                    <p:outputLabel for="alineacionManual" value="Alineación:" />
+                    <p:selectOneMenu id="alineacionManual" value="#{camposTramaController.camposTramaModel.campoTramaEdicion.alineacion}" converter="javax.faces.Integer">
+                        <f:selectItems value="#{camposTramaController.alineacionAsSelectItems}" />
+                    </p:selectOneMenu>
+                </p:panelGrid>
+                <p:commandButton value="#{camposTramaController.camposTramaModel.modificacionCampoTrama ? 'Guardar Cambios' : 'Agregar'}" 
+                    icon="fa fa-plus"
+                    actionListener="#{camposTramaController.guardarCampoTramaModificado()}"
+                    update=":formCamposTrama:messages :formCamposTrama:tabViewPrincipal"
+                    oncomplete="if (!args.validationFailed) PF('dlgManualEntry').hide();"
+                    resetValues="true" />
+            </p:dialog>
+
+            <p:confirmDialog message="¿Está seguro de registrar todos los campos pendientes?" header="Confirmar Registro" severity="warn" widgetVar="dlgConfirmSave">
+                <p:commandButton value="Sí" 
+                icon="fa fa-check" immediate="true"
+                actionListener="#{camposTramaController.confirmarRegistroCampos()}" 
+                    update=":formCamposTrama:messages :formCamposTrama:tabViewPrincipal" oncomplete="PF('dlgConfirmSave').hide();" />
+                
+                <p:commandButton value="No" icon="fa fa-times" onclick="PF('dlgConfirmSave').hide();" type="button" />
+            </p:confirmDialog>
+
+        </h:form>
+
+    </ui:define>
+
+</ui:composition>

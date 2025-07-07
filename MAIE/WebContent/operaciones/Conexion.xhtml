@@ -1,0 +1,228 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:p="http://primefaces.org/ui"
+    template="/plantilla/plantilla.xhtml">
+
+    <ui:define name="content">
+
+        <h:form id="formConexiones">
+            <p:messages id="messages" showDetail="true" closable="true" />
+
+            <h3>Mantenimiento de Conexiones</h3>
+            <p>Gestión de las configuraciones de conexión para las entidades externas.</p>
+
+            <h:panelGrid styleClass="checkBoxGrid" columns="2" cellpadding="3">
+                <p:outputLabel for="chkIdConexion" value="Buscar por ID" />
+                <p:selectBooleanCheckbox id="chkIdConexion"
+                    value="#{conexionController.conexionModel.buscarPorId}">
+                    <p:ajax listener="#{conexionController.seleccionarBusquedaPorId}"
+                        update="formConexiones:panelIdConexion" />
+                </p:selectBooleanCheckbox>
+            </h:panelGrid>
+
+            <!-- 🔍 Panel para búsqueda por ID de Conexión -->
+            <h:panelGroup id="panelIdConexion"
+                rendered="#{conexionController.conexionModel.buscarPorId}">
+                <h:panelGrid columns="3" cellpadding="5">
+                    <p:outputLabel for="buscarIdConexion" value="ID Conexión:" />
+                    <p:inputText id="buscarIdConexion"
+                        value="#{conexionController.conexionModel.filtroIdConexion}"
+                        converter="javax.faces.Long" /> <!-- Asegura la conversión a Long -->
+                    <p:commandButton value="Buscar" icon="fa fa-search"
+                        actionListener="#{conexionController.buscarConexionPorId}"
+                        update="formConexiones:tablaConexiones, formConexiones:messages" />
+                </h:panelGrid>
+            </h:panelGroup>
+
+            <!-- ⚙ Botones principales -->
+            <p:toolbar>
+                <p:toolbarGroup>
+                    <p:commandButton value="Nuevo" icon="fa fa-plus"
+                        onclick="PF('dlgConexion').show();" process="@this"
+                        update="formDialogConexion" />
+                        
+                    <p:commandButton value="Modificar" icon="fa fa-edit"
+                        actionListener="#{conexionController.cargarConexionSeleccionada}"
+                        update="formConexiones,formDialogConexion" process="@this"
+                        disabled="#{empty conexionController.conexionModel.conexionesSeleccionadas}" />
+                        
+                    <p:commandButton value="Habilitar TLS" icon="fa fa-lock"
+                        actionListener="#{conexionController.cambiarEstadoUsaTls(1)}"
+                        update="formConexiones:tablaConexiones, formConexiones:messages" process="@this"
+                        disabled="#{empty conexionController.conexionModel.conexionesSeleccionadas}" />
+                        
+                    <p:commandButton value="Deshabilitar TLS" icon="fa fa-unlock"
+                        actionListener="#{conexionController.cambiarEstadoUsaTls(0)}"
+                        update="formConexiones:tablaConexiones, formConexiones:messages" process="@this"
+                        disabled="#{empty conexionController.conexionModel.conexionesSeleccionadas}" />
+                </p:toolbarGroup>
+            </p:toolbar>
+
+            <!-- 📋 Tabla -->
+            <p:dataTable id="tablaConexiones" var="conexion"
+                styleClass="tabla-chica"
+                value="#{conexionController.conexionModel.listaConexiones}"
+                selection="#{conexionController.conexionModel.conexionesSeleccionadas}"
+                rowKey="#{conexion.idConexion}" rowIndexVar="index" paginator="true" rows="5"
+                paginatorPosition="bottom"
+                paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                rowsPerPageTemplate="5,10,15,20" scrollable="true"
+                scrollHeight="250" resizableColumns="true"
+                emptyMessage="No se encontraron conexiones" update="@form">
+                <p:ajax event="rowSelectCheckbox" process="@this"
+                    update=":formConexiones" />
+                <p:ajax event="rowUnselectCheckbox" process="@this"
+                    update=":formConexiones" />
+                <p:ajax event="toggleSelect" process="@this" update=":formConexiones" />
+                <p:column selectionMode="multiple"
+                    style="width:16px;text-align:center" />
+
+                <!-- 🆔 ID Conexión -->
+                <p:column headerText="ID Conexión">
+                    <h:outputText value="#{conexion.idConexion}" />
+                </p:column>
+
+                <!-- 🆔 ID Entidad -->
+                <p:column headerText="ID Entidad">
+                    <h:outputText value="#{conexion.idEntidad}" />
+                </p:column>
+
+                <!-- 🌐 Protocolo -->
+                <p:column headerText="Protocolo">
+                    <h:outputText value="#{conexion.protocolo}" />
+                </p:column>
+
+                <!-- 🖥️ Host -->
+                <p:column headerText="Host">
+                    <h:outputText value="#{conexion.host}" />
+                </p:column>
+
+                <!-- 🔌 Puerto -->
+                <p:column headerText="Puerto">
+                    <h:outputText value="#{conexion.puerto}" />
+                </p:column>
+
+                <!-- 🔒 Usa TLS -->
+                <p:column headerText="Usa TLS">
+                    <h:outputText value="#{conexion.usaTls == 1 ? 'Sí' : 'No'}" />
+                </p:column>
+
+                <!-- 🔑 Ind Credenciales -->
+                <p:column headerText="Ind. Credenciales">
+                    <h:outputText value="#{conexion.indCredenciales == 1 ? 'Sí' : 'No'}" />
+                </p:column>
+
+                <!-- ⏱️ Timeout Conexión (ms) -->
+                <p:column headerText="Timeout Conexión (ms)">
+                    <h:outputText value="#{conexion.timeoutConexionMs}" />
+                </p:column>
+
+                <!-- ⏱️ Timeout Lectura (ms) -->
+                <p:column headerText="Timeout Lectura (ms)">
+                    <h:outputText value="#{conexion.timeoutLecturaMs}" />
+                </p:column>
+
+                <!-- 🔄 Max Reintentos -->
+                <p:column headerText="Max. Reintentos">
+                    <h:outputText value="#{conexion.maxReintentos}" />
+                </p:column>
+
+                <!-- ⏳ Reintento Espera (ms) -->
+                <p:column headerText="Reintento Espera (ms)">
+                    <h:outputText value="#{conexion.reintentoEsperaMs}" />
+                </p:column>
+
+            </p:dataTable>
+
+        </h:form>
+
+        <!-- 💬 Modal para crear/modificar conexión -->
+        <p:dialog header="Conexión" widgetVar="dlgConexion" modal="true"
+            resizable="false" closable="true" width="550">
+            <h:form id="formDialogConexion">
+                <p:panelGrid columns="2" columnClasses="label,value">
+
+                    <p:outputLabel for="idConexion" value="ID Conexión:" />
+                    <p:inputText id="idConexion"
+                        value="#{conexionController.conexionModel.conexionEdicion.idConexion}"
+                        readonly="#{conexionController.conexionModel.modificacionConexion}"
+                        required="true" converter="javax.faces.Long" />
+
+                    <p:outputLabel for="idEntidad" value="ID Entidad:" />
+                    <p:inputText id="idEntidad"
+                        value="#{conexionController.conexionModel.conexionEdicion.idEntidad}"
+                        required="true" />
+
+                    <p:outputLabel for="protocolo" value="Protocolo:" />
+                    <p:selectOneMenu id="protocolo"
+                        value="#{conexionController.conexionModel.conexionEdicion.protocolo}"
+                        required="true" converter="javax.faces.Integer" >
+                        <f:selectItem itemLabel="Seleccione" itemValue="" noSelectionOption="true" />
+                        <f:selectItem itemLabel="HTTP" itemValue="1" />
+                        <f:selectItem itemLabel="HTTPS" itemValue="2" />
+                        <f:selectItem itemLabel="TCP" itemValue="3" />
+                        <f:selectItem itemLabel="UDP" itemValue="4" />
+                    </p:selectOneMenu>
+
+                    <p:outputLabel for="host" value="Host:" />
+                    <p:inputText id="host"
+                        value="#{conexionController.conexionModel.conexionEdicion.host}"
+                        required="true" />
+
+                    <p:outputLabel for="puerto" value="Puerto:" />
+                    <p:inputText id="puerto"
+                        value="#{conexionController.conexionModel.conexionEdicion.puerto}"
+                        required="true" converter="javax.faces.Integer" />
+
+                    <p:outputLabel for="usaTls" value="Usa TLS:" />
+                    <p:selectOneMenu id="usaTls"
+                        value="#{conexionController.conexionModel.conexionEdicion.usaTls}"
+                        required="true" converter="javax.faces.Integer">
+                        <f:selectItem itemLabel="Seleccione" itemValue="" noSelectionOption="true" />
+                        <f:selectItem itemLabel="Sí" itemValue="1" />
+                        <f:selectItem itemLabel="No" itemValue="0" />
+                    </p:selectOneMenu>
+
+                    <p:outputLabel for="indCredenciales" value="Ind. Credenciales:" />
+                    <p:selectOneMenu id="indCredenciales"
+                        value="#{conexionController.conexionModel.conexionEdicion.indCredenciales}"
+                        required="true" converter="javax.faces.Integer">
+                        <f:selectItem itemLabel="Seleccione" itemValue="" noSelectionOption="true" />
+                        <f:selectItem itemLabel="Sí" itemValue="1" />
+                        <f:selectItem itemLabel="No" itemValue="0" />
+                    </p:selectOneMenu>
+
+                    <p:outputLabel for="timeoutConexionMs" value="Timeout Conexión (ms):" />
+                    <p:inputText id="timeoutConexionMs"
+                        value="#{conexionController.conexionModel.conexionEdicion.timeoutConexionMs}"
+                        required="true" converter="javax.faces.Integer" />
+
+                    <p:outputLabel for="timeoutLecturaMs" value="Timeout Lectura (ms):" />
+                    <p:inputText id="timeoutLecturaMs"
+                        value="#{conexionController.conexionModel.conexionEdicion.timeoutLecturaMs}"
+                        required="true" converter="javax.faces.Integer" />
+
+                    <p:outputLabel for="maxReintentos" value="Max. Reintentos:" />
+                    <p:inputText id="maxReintentos"
+                        value="#{conexionController.conexionModel.conexionEdicion.maxReintentos}"
+                        required="true" converter="javax.faces.Integer" />
+
+                    <p:outputLabel for="reintentoEsperaMs" value="Reintento Espera (ms):" />
+                    <p:inputText id="reintentoEsperaMs"
+                        value="#{conexionController.conexionModel.conexionEdicion.reintentoEsperaMs}"
+                        required="true" converter="javax.faces.Integer" />
+
+                </p:panelGrid>
+
+                <p:commandButton value="Guardar" icon="fa fa-save"
+                    actionListener="#{conexionController.registrarConexion()}"
+                    update=":formConexiones:tablaConexiones, :formConexiones:messages"
+                    oncomplete="if (!args.validationFailed) PF('dlgConexion').hide();" />
+            </h:form>
+        </p:dialog>
+
+    </ui:define>
+
+</ui:composition>

@@ -1,0 +1,28 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:p="http://primefaces.org/ui"
+    xmlns:f="http://java.sun.com/jsf/core">
+
+    <h:form id="formmenu">
+
+      <p:menu>
+            <p:submenu label="Administración">
+                <p:menuitem value="Entidades" action="/operaciones/Entidad.xhtml?faces-redirect=true" icon="fa fa-building" />
+                <p:menuitem value="Operaciones" outcome="/operaciones/Operaciones.xhtml?faces-redirect=true" icon="fa fa-exchange-alt" />
+                <p:menuitem value="Conexiones" outcome="/operaciones/Conexion.xhtml?faces-redirect=true" icon="fa fa-plug" />
+                <p:menuitem value="Campos Trama" outcome="/operaciones/CamposTrama.xhtml?faces-redirect=true" icon="fa fa-file-code" />
+                <p:menuitem value="Llaves Body" outcome="/operaciones/LlaveBody.xhtml?faces-redirect=true" icon="fa fa-code-branch" />
+                <p:menuitem value="Mapeos" outcome="/principal.xhtml?faces-redirect=true" icon="fa fa-sitemap" />
+                <p:menuitem value="Parámetros" outcome="/operaciones/Parametro.xhtml?faces-redirect=true" icon="fa fa-sliders-h" />
+                <p:menuitem value="Auditoría" outcome="/principal.xhtml" icon="fa fa-history" />
+            </p:submenu>
+
+            <p:submenu label="Configuración">
+                <p:menuitem value="Catálogos" outcome="/principal.xhtml" icon="fa fa-list-alt" />
+                <p:menuitem value="Usuarios" outcome="/principal.xhtml" icon="fa fa-users-cog" />
+                <p:menuitem value="Perfiles" outcome="/principal.xhtml" icon="fa fa-user-tag" />
+            </p:submenu>
+        </p:menu>
+    </h:form>
+</ui:composition>
